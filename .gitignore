@@ -1,0 +1,43 @@
+# Conan and build artifacts
+build/
+bin/
+lib/
+lib64/
+pkg/
+conanbuildinfo.*
+conaninfo.txt
+conan.lock
+
+# Conan local cache and info
+.conan/
+conandata/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+
+# Logs and temp files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock files
+*.lock
+
+# Package manager
+node_modules/
+.npm/
+.yarn/
+
+# Coverage
+.coverage
+htmlcov/
