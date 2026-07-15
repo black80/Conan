@@ -38,7 +38,11 @@ class Transaction(Base):
     case: Mapped["InvestigationCase | None"] = relationship(
         back_populates="transaction", uselist=False
     )
+    nfc_payload: Mapped["NfcTransactionPayload | None"] = relationship(
+        back_populates="transaction", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 from app.models.investigation_case import InvestigationCase  # noqa: E402
+from app.models.nfc_transaction_payload import NfcTransactionPayload  # noqa: E402
 from app.models.transaction_rule_hit import TransactionRuleHit  # noqa: E402

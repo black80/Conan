@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_async_session
 from app.services.case_service import CaseService
+from app.services.nfc_transaction_service import NfcTransactionService
 from app.services.transaction_service import TransactionService
 
 
@@ -23,3 +24,9 @@ def get_case_service(
     session: AsyncSession = Depends(get_session),
 ) -> CaseService:
     return CaseService(session)
+
+
+def get_nfc_transaction_service(
+    session: AsyncSession = Depends(get_session),
+) -> NfcTransactionService:
+    return NfcTransactionService(session)

@@ -94,6 +94,7 @@ runs end-to-end without external credentials.
 | Method | Path                        | Description                          |
 |--------|-----------------------------|--------------------------------------|
 | POST   | `/api/transactions`         | Ingest a (flagged) transaction       |
+| POST   | `/api/nfc/transactions`     | Ingest a CaseClosed NFC transaction  |
 | GET    | `/api/transactions`         | List transactions                    |
 | GET    | `/api/transactions/{id}`    | Get a transaction + rule hits        |
 | GET    | `/api/cases`                | List cases (`?status=open|assigned|closed`) |
@@ -115,6 +116,34 @@ curl -X POST http://localhost:8000/api/transactions -H 'Content-Type: applicatio
 
 curl http://localhost:8000/api/cases?status=open
 ```
+
+## NFC reader integration
+
+The CaseClosed Android reader posts its nested EMV payload to
+`POST /api/nfc/transactions`. The endpoint maps the transaction context into the
+existing rule pipeline and stores the complete original payload in
+`nfc_transaction_payloads`. A successful submission returns the transaction ID,
+its current asynchronous status, and whether the request was an idempotent retry.
+
+The Android build reads `BACKEND_BASE_URL` from its ignored `local.properties` or
+from a Gradle property. For a physical NFC phone, set it to a hostname or LAN IP
+that resolves to the computer running Docker Compose, for example:
+
+```properties
+BACKEND_BASE_URL=http://Aymans-MacBook-Air.local:8000
+```
+
+The phone and backend must be on the same network, macOS must allow inbound port
+8000, and the API container must be running. The URL remains editable in the app.
+
+### PoC data warning
+
+The NFC integration is intentionally configured for a controlled demo. It stores
+the full PAN, expiry, cardholder/banking fields, and EMV metadata as plaintext
+JSONB, returns that payload from case detail, and includes it in LLM context. The
+API is unauthenticated and Android permits cleartext HTTP for local networking.
+Use test cards and an isolated trusted network only. This configuration is not
+suitable for production or PCI-regulated data.
 
 ## Fraud rules
 

@@ -44,6 +44,12 @@ class InvestigationCase(Base, TimestampMixin):
     )
     investigator: Mapped["Investigator | None"] = relationship()
 
+    @property
+    def nfc_payload_data(self) -> dict | None:
+        if self.transaction.nfc_payload is None:
+            return None
+        return self.transaction.nfc_payload.payload
+
 
 from app.models.ai_recommendation import AIRecommendation  # noqa: E402
 from app.models.investigator import Investigator  # noqa: E402

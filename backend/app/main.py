@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.routes import cases, investigators, transactions
+from app.api.routes import cases, investigators, nfc_transactions, transactions
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
 
@@ -12,6 +12,7 @@ app = FastAPI(title=settings.app_name)
 app.include_router(transactions.router, prefix="/api")
 app.include_router(cases.router, prefix="/api")
 app.include_router(investigators.router, prefix="/api")
+app.include_router(nfc_transactions.router, prefix="/api")
 
 
 @app.get("/health", tags=["health"])

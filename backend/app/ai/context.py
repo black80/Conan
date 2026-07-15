@@ -23,7 +23,7 @@ def build_ai_context(
     history: list[Transaction],
     stats: dict,
 ) -> dict:
-    return {
+    context = {
         "transaction": transaction_dict(txn),
         "customer_profile": {
             "customer_id": txn.customer_id,
@@ -48,3 +48,6 @@ def build_ai_context(
         "device_information": {"device_id": txn.device_id},
         "fraud_statistics": stats,
     }
+    if txn.nfc_payload is not None:
+        context["nfc_payload"] = txn.nfc_payload.payload
+    return context

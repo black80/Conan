@@ -25,6 +25,9 @@ class CaseRepository:
                 selectinload(InvestigationCase.transaction).selectinload(
                     Transaction.rule_hits
                 ),
+                selectinload(InvestigationCase.transaction).selectinload(
+                    Transaction.nfc_payload
+                ),
                 selectinload(InvestigationCase.recommendation),
                 selectinload(InvestigationCase.investigator),
             )

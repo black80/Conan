@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.enums import CaseResolution, CaseStatus
 from app.schemas.transaction import TransactionOut
+from app.schemas.nfc import NfcTransactionCreate
 
 
 class AIRecommendationOut(BaseModel):
@@ -47,6 +48,9 @@ class CaseDetailOut(CaseOut):
     transaction: TransactionOut
     recommendation: AIRecommendationOut | None
     investigator: InvestigatorOut | None
+    nfc_payload: NfcTransactionCreate | None = Field(
+        default=None, validation_alias="nfc_payload_data"
+    )
 
 
 class AssignRequest(BaseModel):

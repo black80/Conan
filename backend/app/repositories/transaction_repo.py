@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -21,7 +23,10 @@ class TransactionRepository:
     async def get(self, transaction_id: uuid.UUID) -> Transaction | None:
         result = await self.session.execute(
             select(Transaction)
-            .options(selectinload(Transaction.rule_hits))
+            .options(
+                selectinload(Transaction.rule_hits),
+                selectinload(Transaction.nfc_payload),
+            )
             .where(Transaction.id == transaction_id)
         )
         return result.scalar_one_or_none()
@@ -29,7 +34,10 @@ class TransactionRepository:
     async def list(self, limit: int = 100, offset: int = 0) -> list[Transaction]:
         result = await self.session.execute(
             select(Transaction)
-            .options(selectinload(Transaction.rule_hits))
+            .options(
+                selectinload(Transaction.rule_hits),
+                selectinload(Transaction.nfc_payload),
+            )
             .order_by(Transaction.created_at.desc())
             .limit(limit)
             .offset(offset)
