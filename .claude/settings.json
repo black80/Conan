@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(dataviz)",
+      "Skill(dataviz:*)",
+      "Bash(npx shadcn@latest add tabs select textarea sonner avatar --yes)",
+      "Bash(npm run *)"
+    ]
+  }
+}
