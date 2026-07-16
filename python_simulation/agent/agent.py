@@ -689,7 +689,8 @@ def _investigate_openai(alert, model, as_of, trace, verbose, client, system,
 # ------------------------------------------------------------------- the agent
 
 def investigate(alert: dict, model: str = MODEL, client=None,
-                verbose: bool = False, version: str = "v4", on_step=None) -> dict:
+                verbose: bool = False, version: str = "v4", on_step=None,
+                exemplars: dict | None = None) -> dict:
     """Run one investigation. Returns a Case-shaped dict (contracts.Case).
 
     model:   a Claude id (Anthropic API) or an "openai/"-prefixed id such as
@@ -699,17 +700,27 @@ def investigate(alert: dict, model: str = MODEL, client=None,
     on_step: optional callback(event: dict) fired live as the agent works --
              {type:"tool"|"tool_done"|"filing", label, name, args}. Used by the
              UI backend to stream the investigation; None in batch runs.
+    exemplars: optional exemplars.json content (agent/tuning.py). Appends the
+             "prior analyst corrections" block to the system prompt, with
+             leave-one-out (this alert's own card is never shown). EXPLICIT
+             opt-in only -- batch benchmarks that don't pass it are unaffected.
     """
     as_of = alert["txn"]["timestamp"]
     trace: list[str] = []
     system = SYSTEM_V3 if version == "v3" else SYSTEM_V4
+    if exemplars:
+        from agent.tuning import prompt_block
+        block = prompt_block(exemplars, exclude_alert_id=alert["alert_id"])
+        if block:
+            system = system + block
+            version = f"{version}+ex{exemplars.get('version', '?')}"
     # Claude models -> Anthropic API; everything else -> OpenAI-compatible (Groq).
     loop = (_investigate_anthropic if model.startswith("claude")
             else _investigate_openai)
     verdict, usage = loop(alert, model, as_of, trace, verbose, client, system,
                           on_step=on_step)
     if verdict is None:
-        verdict = _TIMEOUT_VERDICT if version == "v4" else {
+        verdict = _TIMEOUT_VERDICT if version.startswith("v4") else {
             "summary": "No verdict within turn limit; escalating.",
             "recommendation": "escalate", "confidence": 0.0,
             "typology": None, "evidence": []}

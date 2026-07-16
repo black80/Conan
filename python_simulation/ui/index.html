@@ -9,21 +9,31 @@
     --bg:#0d1117; --panel:#141b24; --panel2:#0f151d; --line:#232d3a;
     --ink:#e6edf3; --dim:#8b97a6; --faint:#5b6673;
     --blue:#4a9eff; --green:#3fb950; --amber:#d29922; --red:#f75c58;
-    --chip:#1c2530;
+    --purple:#b48eff; --chip:#1c2530;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
     font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:1120px;margin:0 auto;padding:22px}
+  .wrap{max-width:1200px;margin:0 auto;padding:22px}
   header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-    padding-bottom:16px;border-bottom:1px solid var(--line)}
+    padding-bottom:14px;border-bottom:1px solid var(--line)}
   h1{font-size:17px;margin:0;font-weight:650;letter-spacing:.2px}
   h1 .sub{color:var(--dim);font-weight:400;font-size:13px;margin-left:8px}
   .spacer{flex:1}
-  button.start{background:var(--blue);color:#04101f;border:0;border-radius:7px;
+  .navtabs{display:flex;gap:2px;margin-top:14px;border-bottom:1px solid var(--line)}
+  .navtab{padding:10px 16px;color:var(--dim);cursor:pointer;font-size:13.5px;
+    font-weight:600;border-bottom:2px solid transparent}
+  .navtab.on{color:var(--ink);border-bottom-color:var(--blue)}
+  .page{display:none;padding-top:16px}
+  .page.on{display:block}
+  button.primary{background:var(--blue);color:#04101f;border:0;border-radius:7px;
     padding:9px 18px;font-weight:650;font-size:13px;cursor:pointer}
-  button.start:disabled{opacity:.45;cursor:default}
-  .counters{display:flex;gap:8px;margin:16px 0 6px}
+  button.primary:disabled{opacity:.45;cursor:default}
+  button.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line);
+    border-radius:7px;padding:7px 14px;font-weight:600;font-size:12.5px;cursor:pointer}
+  button.ghost:hover{border-color:var(--blue)}
+  button.ghost:disabled{opacity:.4;cursor:default}
+  .counters{display:flex;gap:8px;margin:2px 0 6px}
   .counter{background:var(--panel);border:1px solid var(--line);border-radius:8px;
     padding:9px 13px;min-width:96px}
   .counter .n{font-size:20px;font-weight:680;line-height:1}
@@ -35,7 +45,7 @@
   table{width:100%;border-collapse:collapse;margin-top:12px}
   th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
     color:var(--faint);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line)}
-  td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
   tr.row{opacity:0;transform:translateY(-4px);transition:opacity .4s,transform .4s,background .15s}
   tr.row.in{opacity:1;transform:none}
   tr.row.clickable{cursor:pointer}
@@ -52,25 +62,31 @@
     border-top-color:var(--blue);animation:spin .7s linear infinite;flex:none}
   @keyframes spin{to{transform:rotate(360deg)}}
   .action{color:var(--dim);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;
-    white-space:nowrap;max-width:340px}
+    white-space:nowrap;max-width:300px}
   .verdict{display:inline-flex;align-items:center;gap:6px;font-weight:640;
     padding:3px 9px;border-radius:6px;font-size:12.5px}
   .v-approve{background:rgba(63,185,80,.14);color:var(--green)}
   .v-escalate{background:rgba(210,153,34,.16);color:var(--amber)}
   .v-block{background:rgba(247,92,88,.16);color:var(--red)}
+  .labchip{display:inline-flex;font-size:11.5px;font-weight:650;padding:2px 8px;
+    border-radius:5px;background:rgba(180,142,255,.14);color:var(--purple)}
   .hint{color:var(--faint);font-size:12px;margin-left:8px}
+  .rrbtn{background:none;border:1px solid var(--line);border-radius:5px;
+    color:var(--dim);cursor:pointer;font-size:11px;padding:2px 8px;margin-left:8px}
+  .rrbtn:hover{border-color:var(--blue);color:var(--blue)}
   .empty{color:var(--faint);padding:40px 12px;text-align:center}
+  .who{color:var(--dim);font-size:12.5px}
 
   /* drawer */
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;
     transition:opacity .25s;z-index:40}
   .scrim.open{opacity:1;pointer-events:auto}
-  .drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,94vw);
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(600px,94vw);
     background:var(--panel);border-left:1px solid var(--line);z-index:50;
     transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
     display:flex;flex-direction:column}
   .drawer.open{transform:none}
-  .dh{padding:18px 20px;border-bottom:1px solid var(--line)}
+  .dh{padding:16px 20px;border-bottom:1px solid var(--line)}
   .dh .cid{font-family:ui-monospace,Menlo,monospace;color:var(--faint);font-size:12px}
   .dh .row2{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
   .dh .acct2{font-family:ui-monospace,Menlo,monospace;font-size:15px}
@@ -80,8 +96,13 @@
   .t-neu{background:rgba(210,153,34,.16);color:var(--amber)}
   .x{margin-left:auto;background:none;border:0;color:var(--dim);font-size:22px;
     cursor:pointer;line-height:1}
+  .labelbar{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .labelbar .t{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:.4px}
+  .lbtn{border:1px solid var(--line);background:var(--chip);color:var(--ink);
+    border-radius:6px;padding:6px 13px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .lbtn:hover{border-color:var(--purple)}
   .tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid var(--line)}
-  .tab{padding:11px 4px;margin-right:18px;color:var(--dim);cursor:pointer;font-size:13px;
+  .tab{padding:11px 4px;margin-right:16px;color:var(--dim);cursor:pointer;font-size:13px;
     border-bottom:2px solid transparent;font-weight:550}
   .tab.on{color:var(--ink);border-bottom-color:var(--blue)}
   .body{padding:20px;overflow-y:auto;flex:1}
@@ -96,9 +117,8 @@
   .ev .val{color:var(--ink);font-size:12.5px}
   .prose{color:var(--dim);font-size:13px;line-height:1.6;margin-top:16px;
     padding-top:14px;border-top:1px solid var(--line)}
-  .meta{display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--faint)}
+  .meta{display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--faint);flex-wrap:wrap}
   .meta b{color:var(--dim);font-weight:600}
-  /* activity tab */
   .step{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--panel2);
     align-items:flex-start}
   .step .n{color:var(--faint);font-family:ui-monospace,Menlo,monospace;font-size:12px;
@@ -110,38 +130,201 @@
   .step .ck{color:var(--green);margin-left:auto;font-size:12px}
   .live-tail{display:flex;align-items:center;gap:8px;color:var(--blue);
     font-size:13px;padding:10px 0}
+  /* chat */
+  .chatlog{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .msg{max-width:88%;padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.55;
+    white-space:pre-wrap}
+  .msg.user{align-self:flex-end;background:rgba(74,158,255,.16)}
+  .msg.agent{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}
+  .msg .toolline{color:var(--faint);font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+  .chatbox{display:flex;gap:8px;position:sticky;bottom:0;background:var(--panel);
+    padding-top:8px}
+  .chatbox input{flex:1;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:7px;padding:9px 12px;font-size:13px}
+  .chatbox input:focus{outline:none;border-color:var(--blue)}
+
+  /* cards / panels shared by Rule Lab + Tuning */
+  .cols{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:18px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:16px}
+  .card h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--dim);font-weight:650}
+  .form label{display:block;font-size:12px;color:var(--dim);margin:10px 0 4px}
+  .form input,.form textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:7px;padding:8px 11px;font-size:13px;font-family:inherit}
+  .form input:focus,.form textarea:focus{outline:none;border-color:var(--blue)}
+  .list-item{display:flex;align-items:center;gap:10px;padding:10px 2px;
+    border-bottom:1px solid var(--panel2);font-size:12.5px}
+  .list-item .mono2{font-family:ui-monospace,Menlo,monospace;color:var(--dim)}
+  .pill{font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:5px}
+  .p-new{background:rgba(74,158,255,.14);color:var(--blue)}
+  .p-done{background:rgba(63,185,80,.14);color:var(--green)}
+  .p-off{background:var(--chip);color:var(--faint)}
+  .stage{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;color:var(--dim)}
+  .stage.done{color:var(--ink)} .stage.live{color:var(--blue)}
+  .stage .ic{width:18px;text-align:center}
+  .rulecard{border:1px solid var(--line);border-radius:9px;padding:13px;margin-top:12px;
+    background:var(--panel2)}
+  .rulecard .nm{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:13.5px}
+  .rulecard .cond{font-family:ui-monospace,Menlo,monospace;color:var(--blue);
+    font-size:12.5px;margin:7px 0}
+  .rulecard .rat{color:var(--dim);font-size:12.5px;line-height:1.5}
+  .btrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+  .bt{min-width:120px}
+  .bt .v{font-size:17px;font-weight:700} .bt .k{font-size:11px;color:var(--faint);
+    text-transform:uppercase;letter-spacing:.4px}
+  .ok{color:var(--green)} .bad{color:var(--red)}
+  .verd{font-size:14px;font-weight:750;letter-spacing:.5px;padding:4px 12px;border-radius:7px}
+  .verd.acc{background:rgba(63,185,80,.16);color:var(--green)}
+  .verd.rej{background:rgba(247,92,88,.16);color:var(--red)}
+  /* diff view */
+  .diffgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .diffcol{border:1px solid var(--line);border-radius:9px;padding:13px;background:var(--panel2)}
+  .diffcol h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--faint)}
+  .diffcol.new{border-color:rgba(74,158,255,.5)}
+  .outc{font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px}
+  .o-flipped_correct{background:rgba(63,185,80,.16);color:var(--green)}
+  .o-still_wrong{background:rgba(247,92,88,.16);color:var(--red)}
+  .o-regressed{background:rgba(210,153,34,.18);color:var(--amber)}
+  .o-still_correct{background:var(--chip);color:var(--dim)}
+  .ceil{display:inline-block;border:1.5px solid var(--red);color:var(--red);
+    font-weight:800;font-size:11px;letter-spacing:1px;padding:3px 9px;border-radius:5px;
+    transform:rotate(-3deg)}
+  .scrollwrap{max-height:300px;overflow-y:auto;margin-top:4px;
+    border-bottom:1px solid var(--line)}
+  .scrollwrap thead th{position:sticky;top:0;background:var(--panel);z-index:2}
+  tr.msel td{background:var(--panel2)}
+  .resrow{display:flex;align-items:center;gap:10px;padding:9px 2px;
+    border-bottom:1px solid var(--panel2);font-size:12.5px;cursor:pointer}
+  .resrow:hover{background:var(--panel2)}
+  .resrow.sel{background:var(--panel2)}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:80;
+    background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    padding:11px 18px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5);
+    opacity:0;transition:opacity .3s}
+  .toast.show{opacity:1}
+  .note{color:var(--faint);font-size:12px;margin-top:10px;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>AML Analyst <span class="sub">live agent triage · IBM HI-Small</span></h1>
-    </div>
+    <div><h1>AML Analyst <span class="sub">live agent · IBM HI-Small (synthetic)</span></h1></div>
     <div class="spacer"></div>
     <span id="statusLine" class="hint">connecting…</span>
-    <button id="startBtn" class="start" disabled>Start shift</button>
+    <button id="rerunAllBtn" class="ghost" hidden onclick="rerunShift()">↻ Re-run shift</button>
+    <button id="startBtn" class="primary" disabled>Start shift</button>
   </header>
 
-  <div class="counters">
-    <div class="counter busy"><div class="n" id="cBusy">0</div><div class="l">Investigating</div></div>
-    <div class="counter close"><div class="n" id="cClose">0</div><div class="l">Auto-closed</div></div>
-    <div class="counter esc"><div class="n" id="cEsc">0</div><div class="l">Escalated</div></div>
-    <div class="counter block"><div class="n" id="cBlock">0</div><div class="l">Blocked</div></div>
+  <div class="navtabs">
+    <div class="navtab on" data-page="queue" onclick="showPage('queue')">Queue</div>
+    <div class="navtab" data-page="rulelab" onclick="showPage('rulelab')">Rule Lab</div>
+    <div class="navtab" data-page="tuning" onclick="showPage('tuning')">Model Tuning</div>
   </div>
 
-  <table>
-    <thead><tr>
-      <th style="width:80px">Time</th>
-      <th style="width:120px">Alert</th>
-      <th style="width:120px">Account</th>
-      <th style="width:230px">Rules fired</th>
-      <th>Status</th>
-    </tr></thead>
-    <tbody id="tbody">
-      <tr><td colspan="5" class="empty" id="emptyRow">Press “Start shift” to begin the day’s alert stream.</td></tr>
-    </tbody>
-  </table>
+  <!-- ============================== QUEUE ============================== -->
+  <div class="page on" id="page-queue">
+    <div class="counters">
+      <div class="counter busy"><div class="n" id="cBusy">0</div><div class="l">Investigating</div></div>
+      <div class="counter close"><div class="n" id="cClose">0</div><div class="l">Auto-closed</div></div>
+      <div class="counter esc"><div class="n" id="cEsc">0</div><div class="l">Escalated</div></div>
+      <div class="counter block"><div class="n" id="cBlock">0</div><div class="l">Blocked</div></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:70px">Time</th>
+        <th style="width:115px">Alert</th>
+        <th style="width:110px">Account</th>
+        <th style="width:200px">Rules fired</th>
+        <th style="width:90px">Assigned</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" class="empty" id="emptyRow">Press “Start shift” to begin the day’s alert stream.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================= RULE LAB ============================= -->
+  <div class="page" id="page-rulelab">
+    <div class="cols" style="grid-template-columns:1fr 340px">
+      <div class="card">
+        <h3>Missed cases <span class="hint">fraud the rules never alerted on — reported by victims; visible to you, never to the agent</span></h3>
+        <div class="scrollwrap">
+          <table style="margin-top:0">
+            <thead><tr>
+              <th style="width:70px">Case</th>
+              <th style="width:120px">Account</th><th>Window</th>
+              <th style="width:80px">Accounts</th>
+            </tr></thead>
+            <tbody id="missedBody"><tr><td colspan="4" class="empty">loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Case context</h3>
+        <div id="missedCtx"><div class="note">Select a missed case to read the
+          victim's report.</div></div>
+      </div>
+    </div>
+    <div class="cols" style="margin-top:14px">
+      <div>
+        <div class="card">
+          <h3>Lab bench</h3>
+          <div id="labStages"><div class="note">Press “Propose rule” on a missed case. The agent
+            contrasts it against the whole bank, drafts a rule, and the engine tests the rule on
+            all 5M transactions. Every number is computed, never asserted.</div></div>
+          <div id="labDraft"></div>
+          <div id="labBacktest"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Detection rules</h3>
+          <div id="ruleList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== TUNING ============================== -->
+  <div class="page" id="page-tuning">
+    <div class="cols" style="grid-template-columns:minmax(340px,440px) 1fr">
+      <div class="card">
+        <h3>Disagreements <span class="hint">cases where your label differed from the agent</span></h3>
+        <table style="margin-top:4px">
+          <thead><tr>
+            <th>Case</th><th>Agent said</th><th>You said</th><th>Type</th><th>Result</th>
+          </tr></thead>
+          <tbody id="failBody"><tr><td colspan="5" class="empty">No disagreements yet —
+            label cases in the Queue.</td></tr></tbody>
+        </table>
+        <div style="margin-top:14px">
+          <button class="primary" id="reviewBtn" onclick="reviewAll()" disabled>🧠 Agent self-review</button>
+        </div>
+        <div class="note">One process: the agent re-reads every disagreed case, explains
+          why it was wrong, and proposes how its reasoning should change. Nothing is
+          installed until you approve.</div>
+      </div>
+      <div class="card">
+        <h3>Agent self-review <span class="hint">live — the agent’s own words</span></h3>
+        <div id="reviewFlow"><div class="note">Press “Agent self-review”. Each post-mortem
+          streams in as the agent writes it.</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px" id="verifyCard" hidden>
+      <h3>Verify the change <span class="hint">re-review the disagreed cases with the adapted reasoning — old vs new</span></h3>
+      <div style="margin-bottom:10px">
+        <button class="primary" id="verifyBtn" onclick="verifyAll()">▶ Re-review all cases</button>
+      </div>
+      <div class="cols">
+        <div id="tuneResults"></div>
+        <div id="rerunPanel"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
@@ -154,44 +337,88 @@
       <span id="dTruth"></span>
       <button class="x" onclick="closeDrawer()">×</button>
     </div>
+    <div class="labelbar" id="dLabelBar"></div>
   </div>
   <div class="tabs">
     <div class="tab on" id="tabSum" onclick="swap('sum')">Case summary</div>
     <div class="tab" id="tabAct" onclick="swap('act')">Agent activity</div>
+    <div class="tab" id="tabAsk" onclick="swap('ask')">Ask the agent</div>
   </div>
   <div class="body" id="dBody"></div>
 </aside>
+<div class="toast" id="toast"></div>
 
 <script>
-const REVEAL_MS = 7000;          // gap between alerts appearing (slower stream)
-const NEW_HOLD_MS = 1400;        // how long a row shows "New alert" before the agent starts
-let ALERTS = [], S = [], openIdx = null, tab = 'sum';
+const REVEAL_MS = 7000, NEW_HOLD_MS = 1400;
+let S = [], openIdx = null, tab = 'sum', started = false;
+let EXEMPLARS = null;
 
 const $ = id => document.getElementById(id);
 const fmtTime = ts => ts.slice(11,16);
-const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const esc = s => String(s??'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const toast = m => { const t=$('toast'); t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 4200); };
 
+function showPage(p){
+  document.querySelectorAll('.navtab').forEach(n=>n.classList.toggle('on', n.dataset.page===p));
+  document.querySelectorAll('.page').forEach(n=>n.classList.toggle('on', n.id==='page-'+p));
+  if(p==='rulelab'){ loadReports(); loadRules(); }
+  if(p==='tuning'){ loadFailures(); }
+}
+
+/* ---- SSE over POST (fetch streaming) ---- */
+async function sseFetch(url, body, onEvent){
+  const res = await fetch(url, {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{})});
+  if(!res.ok){ onEvent({type:'error', message:(await res.json()).error || res.statusText}); return; }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = '';
+  while(true){
+    const {done, value} = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, {stream:true});
+    let i;
+    while((i = buf.indexOf('\n\n')) >= 0){
+      const chunk = buf.slice(0, i); buf = buf.slice(i+2);
+      const line = chunk.split('\n').find(l=>l.startsWith('data: '));
+      if(line){ try{ onEvent(JSON.parse(line.slice(6))); }catch(e){} }
+    }
+  }
+}
+
+/* ================================ QUEUE ================================ */
 async function boot(){
   try{
-    ALERTS = await (await fetch('/api/alerts')).json();
-    $('statusLine').textContent = ALERTS.length + ' alerts queued · Haiku agent';
+    const alerts = await (await fetch('/api/alerts')).json();
+    S = alerts.map(a => ({a, phase:'queued', action:'', steps:[], case:a.case,
+                          label:a.label, truth:null, chat:[]}));
+    $('statusLine').textContent = alerts.length + ' alerts · Haiku agent · live';
     $('startBtn').disabled = false;
-  }catch(e){
-    $('statusLine').textContent = 'backend not reachable — start server.py';
-  }
+    // restore already-investigated cases immediately
+    if(S.some(s=>s.case)){ $('emptyRow')?.remove();
+      S.forEach((s,i)=>{ addRow(i); $('row'+i).classList.add('in');
+        if(s.case){ s.phase='done'; rowClickable(i);
+                    $('who'+i).textContent = s.a.assigned_to||'—'; } paint(i); });
+      counters(); started = true;
+      $('startBtn').textContent = 'Investigate remaining';
+      if(!S.some(s=>!s.case)) $('startBtn').disabled = true;
+    }
+  }catch(e){ $('statusLine').textContent = 'backend not reachable — start server.py'; }
 }
 boot();
 
 $('startBtn').onclick = () => {
   $('startBtn').disabled = true;
-  $('emptyRow')?.remove();
-  S = ALERTS.map(a => ({a, phase:'queued', action:'', steps:[], case:null, truth:null}));
-  S.forEach((_, i) => addRow(i));
-  ALERTS.forEach((_, i) => setTimeout(() => reveal(i), i * REVEAL_MS));
+  started = true;
+  let k = 0;
+  S.forEach((s,i) => { if(s.phase!=='queued') return;
+    setTimeout(()=>reveal(i), (k++) * REVEAL_MS); });
 };
 
 function addRow(i){
-  const a = ALERTS[i];
+  if($('row'+i)) return;
+  $('emptyRow')?.remove();
+  const a = S[i].a;
   const tr = document.createElement('tr');
   tr.className = 'row'; tr.id = 'row'+i;
   tr.innerHTML =
@@ -199,153 +426,473 @@ function addRow(i){
     `<td class="mono">${a.alert_id}</td>`+
     `<td class="mono acct">${a.subject_account}</td>`+
     `<td class="rules">${a.rules_fired.slice(0,2).map(r=>`<span>${r}</span>`).join('')}</td>`+
+    `<td class="who" id="who${i}">—</td>`+
     `<td><div class="status"></div></td>`;
   $('tbody').appendChild(tr);
   tr.querySelector('.status').id = 'st'+i;
 }
 
 function reveal(i){
-  $('row'+i).classList.add('in');
-  S[i].phase = 'new';
-  paint(i);
-  setTimeout(() => startInvestigation(i), NEW_HOLD_MS);
+  addRow(i);                                   // the alert ARRIVES now
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('row'+i).classList.add('in')));
+  S[i].phase = 'new'; paint(i);
+  setTimeout(()=>investigate(i), NEW_HOLD_MS);
+}
+function rowClickable(i){
+  const r = $('row'+i); r.classList.add('clickable'); r.onclick = ()=>openDrawer(i);
 }
 
-function startInvestigation(i){
-  S[i].phase = 'busy'; S[i].action = 'Opening the case…';
-  $('row'+i).classList.add('clickable');
-  $('row'+i).onclick = () => openDrawer(i);
-  paint(i); counters();
-  const es = new EventSource('/api/investigate?id=' + encodeURIComponent(ALERTS[i].alert_id));
-  es.onmessage = ev => onEvent(i, JSON.parse(ev.data), es);
-  es.onerror = () => { es.close(); if(S[i].phase==='busy'){ S[i].phase='error'; paint(i);} };
-}
-
-function onEvent(i, ev, es){
+function investigate(i){
   const s = S[i];
-  if(ev.type === 'tool'){
-    s.action = ev.label;
-    s.steps.push({label: ev.label, args: ev.args, done: false});
-  } else if(ev.type === 'tool_done'){
-    const last = [...s.steps].reverse().find(x => !x.done);
-    if(last) last.done = true;
-  } else if(ev.type === 'filing'){
-    s.action = ev.label;
-    s.steps.push({label: ev.label, args: null, done: false, filing: true});
-  } else if(ev.type === 'done'){
-    es.close();
-    s.case = ev.case; s.truth = ev.truth; s.phase = 'done';
-    s.steps.forEach(x => x.done = true);
-  } else if(ev.type === 'error'){
-    es.close(); s.phase = 'error'; s.action = ev.message;
-  }
-  paint(i);
-  if(openIdx === i) renderDrawer(i);
-  if(ev.type === 'done') counters();
+  s.phase='busy'; s.action='Opening the case…'; rowClickable(i); paint(i); counters();
+  $('who'+i).textContent = s.a.assigned_to || '—';   // assigned as the agent picks it up
+  const es = new EventSource('/api/investigate?id=' + encodeURIComponent(s.a.alert_id));
+  es.onmessage = ev => {
+    const e = JSON.parse(ev.data);
+    if(e.type==='tool'){ s.action=e.label; s.steps.push({label:e.label,args:e.args,done:false}); }
+    else if(e.type==='tool_done'){ const l=[...s.steps].reverse().find(x=>!x.done); if(l) l.done=true; }
+    else if(e.type==='filing'){ s.action=e.label; s.steps.push({label:e.label,done:false,filing:true}); }
+    else if(e.type==='done'){ es.close(); s.case=e.case; s.truth=e.truth; s.phase='done';
+      s.steps.forEach(x=>x.done=true); counters(); }
+    else if(e.type==='error'){ es.close(); s.phase='error'; s.action=e.message; }
+    paint(i); if(openIdx===i) renderDrawer(i);
+  };
+  es.onerror = () => { es.close(); if(s.phase==='busy'){ s.phase='error'; paint(i); } };
 }
 
 function paint(i){
   const s = S[i], el = $('st'+i); if(!el) return;
-  if(s.phase === 'new'){
-    el.innerHTML = `<span class="dot new"></span><span class="badge-ink">New alert</span>`;
-  } else if(s.phase === 'busy'){
-    el.innerHTML = `<span class="spin"></span><span class="action">${esc(s.action)}</span>`;
-  } else if(s.phase === 'error'){
-    el.innerHTML = `<span class="dot new"></span><span class="action">investigation failed</span>`;
-  } else if(s.phase === 'done'){
+  if(s.phase==='queued') el.innerHTML = `<span class="hint" style="margin:0">queued…</span>`;
+  else if(s.phase==='new') el.innerHTML = `<span class="dot new"></span><span class="badge-ink">New alert</span>`;
+  else if(s.phase==='busy') el.innerHTML = `<span class="spin"></span><span class="action">${esc(s.action)}</span>`;
+  else if(s.phase==='error') el.innerHTML = `<span class="dot new"></span><span class="action">${esc(s.action||'failed')}</span>`;
+  else if(s.phase==='done'){
     el.innerHTML = verdictHTML(s.case.recommendation) +
-      `<span class="hint">${s.case._meta.tool_calls} tools · click to open</span>`;
+      (s.label ? ` <span class="labchip">🏷 ${s.label.label}</span>` :
+                 ` <span class="hint">click to review</span>`) +
+      ` <button class="rrbtn" title="re-run this investigation"
+          onclick="event.stopPropagation();rerunCase(${i})">↻ rerun</button>`;
+    $('rerunAllBtn').hidden = false;
   }
 }
-
+function rerunShift(){
+  // re-simulate from zero: empty queue, then the alert stream arrives again
+  closeDrawer();
+  S.forEach(s => { s.phase='queued'; s.case=null; s.truth=null;
+                   s.steps=[]; s.chat=[]; });
+  $('tbody').innerHTML =
+    '<tr><td colspan="6" class="empty" id="emptyRow">waiting for the transaction stream…</td></tr>';
+  $('rerunAllBtn').hidden = true;
+  counters();
+  let k = 0;
+  S.forEach((s,i) => setTimeout(()=>reveal(i), 900 + (k++) * REVEAL_MS));
+  toast('Restarting the day from zero — alerts will stream in again');
+}
 function verdictHTML(rec){
   const m = {approve:['v-approve','✓ Auto-closed'], escalate:['v-escalate','⬆ Escalated'],
              block:['v-block','⛔ Blocked']}[rec] || ['v-escalate','⬆ Escalated'];
   return `<span class="verdict ${m[0]}">${m[1]}</span>`;
 }
-
 function counters(){
   const c = {busy:0, approve:0, escalate:0, block:0};
-  S.forEach(s => {
-    if(s.phase === 'busy') c.busy++;
-    if(s.phase === 'done') c[s.case.recommendation]++;
-  });
-  $('cBusy').textContent = c.busy; $('cClose').textContent = c.approve;
-  $('cEsc').textContent = c.escalate; $('cBlock').textContent = c.block;
+  S.forEach(s => { if(s.phase==='busy') c.busy++;
+    if(s.phase==='done') c[s.case.recommendation]++; });
+  $('cBusy').textContent=c.busy; $('cClose').textContent=c.approve;
+  $('cEsc').textContent=c.escalate; $('cBlock').textContent=c.block;
 }
 
 /* ---- drawer ---- */
-function openDrawer(i){ openIdx = i; tab = S[i].phase==='done' ? 'sum' : 'act';
+function openDrawer(i){ openIdx=i; tab = S[i].phase==='done' ? 'sum' : 'act';
   syncTabs(); renderDrawer(i); $('scrim').classList.add('open'); $('drawer').classList.add('open'); }
-function closeDrawer(){ openIdx = null; $('scrim').classList.remove('open'); $('drawer').classList.remove('open'); }
-function swap(t){ tab = t; syncTabs(); if(openIdx!=null) renderDrawer(openIdx); }
-function syncTabs(){ $('tabSum').classList.toggle('on', tab==='sum'); $('tabAct').classList.toggle('on', tab==='act'); }
+function closeDrawer(){ openIdx=null; $('scrim').classList.remove('open'); $('drawer').classList.remove('open'); }
+function swap(t){ tab=t; syncTabs(); if(openIdx!=null) renderDrawer(openIdx); }
+function syncTabs(){ $('tabSum').classList.toggle('on',tab==='sum');
+  $('tabAct').classList.toggle('on',tab==='act'); $('tabAsk').classList.toggle('on',tab==='ask'); }
 
 function renderDrawer(i){
-  const s = S[i], a = ALERTS[i];
-  $('dCid').textContent = (s.case ? s.case.case_id : 'CS-' + a.alert_id.replace('AL-','')) +
-    '  ·  ' + fmtTime(a.timestamp);
+  const s = S[i], a = s.a;
+  $('dCid').textContent = (s.case ? s.case.case_id : 'CS-'+a.alert_id.replace('AL-','')) +
+    '  ·  ' + fmtTime(a.timestamp) + (a.assigned_to ? '  ·  assigned to '+a.assigned_to : '');
   $('dAcct').textContent = a.subject_account;
   $('dVerdict').innerHTML = s.case ? verdictHTML(s.case.recommendation) : '';
-  $('dTruth').innerHTML = s.truth ? truthHTML(s) : '';
+  $('dTruth').innerHTML = (s.truth && s.case) ? truthHTML(s) : '';
+  $('dLabelBar').innerHTML = labelBarHTML(s);
   $('tabAct').textContent = 'Agent activity' + (s.steps.length ? ` (${s.steps.length})` : '');
-  $('dBody').innerHTML = tab === 'sum' ? summaryHTML(s) : activityHTML(s);
+  $('dBody').innerHTML = tab==='sum' ? summaryHTML(s) : tab==='act' ? activityHTML(s) : askHTML(s);
+  if(tab==='ask'){ const inp=$('askInput'); if(inp) inp.focus(); }
 }
-
+function labelBarHTML(s){
+  if(s.phase!=='done') return '';
+  const rerunBtn = `<span style="flex:1"></span>`+
+    `<button class="ghost" onclick="rerunCase(${openIdx})" title="run the investigation again with the current prompt">↻ Re-investigate</button>`;
+  if(s.label) return `<span class="t">Labeled</span><span class="labchip">🏷 ${s.label.label}</span>`+
+    `<span class="hint">${s.label.final_decision}${s.label.disagreement?' · disagreement logged for tuning':''}</span>`+rerunBtn;
+  return `<span class="t">Your verdict:</span>`+
+    ['mule','normal','suspicious'].map(l=>
+      `<button class="lbtn" onclick="fileLabel(${openIdx},'${l}')">${
+        {mule:'🔴 Mule',normal:'🟢 Normal',suspicious:'🟡 Suspicious'}[l]}</button>`).join('')+rerunBtn;
+}
+function rerunCase(i){
+  const s = S[i];
+  if(!s || s.phase==='busy') return;
+  s.case=null; s.truth=null; s.steps=[]; s.chat=[];   // fresh investigation
+  tab='act'; syncTabs();
+  investigate(i);           // uses the CURRENT prompt (incl. approved corrections)
+  renderDrawer(i);
+  toast('Re-investigating with the current prompt — watch Agent activity');
+}
+async function fileLabel(i, label){
+  const s = S[i];
+  const res = await fetch(`/api/cases/${s.case.case_id}/label`, {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify({label})});
+  const rec = await res.json();
+  if(rec.error){ toast('⚠ '+rec.error); return; }
+  s.label = rec; paint(i); renderDrawer(i);
+  toast(rec.disagreement
+    ? `Label recorded — agent said ${rec.agent_recommendation.toUpperCase()}, you said ${label.toUpperCase()} → ${rec.severe?'severe failure logged for tuning':'disagreement logged'}`
+    : `Label recorded — agrees with the agent's ${rec.agent_recommendation.toUpperCase()}`);
+}
 function truthHTML(s){
-  const real = s.truth.real, rec = s.case.recommendation, kept = rec!=='approve';
-  let cls, txt;
-  if(real && kept){ cls='t-good'; txt='✓ caught — real laundering'; }
-  else if(real && !kept){ cls='t-bad'; txt='✕ missed — real laundering'; }
-  else if(!real && !kept){ cls='t-neu'; txt='• legit sent for review'; }
-  else { cls='t-good'; txt='✓ cleared — legitimate'; }
+  const real=s.truth.real, kept=s.case.recommendation!=='approve';
+  let cls,txt;
+  if(real&&kept){cls='t-good';txt='✓ caught — real laundering';}
+  else if(real&&!kept){cls='t-bad';txt='✕ missed — real laundering';}
+  else if(!real&&!kept){cls='t-neu';txt='• legit sent for review';}
+  else {cls='t-good';txt='✓ cleared — legitimate';}
   return `<span class="truth ${cls}">${txt}</span>`;
 }
-
 function summaryHTML(s){
-  if(!s.case) return `<div class="live-tail"><span class="spin"></span> The agent is still investigating — open “Agent activity” to watch it work.</div>`;
-  const c = s.case, ev = c.evidence || [];
-  const fraud = ev.filter(e => e.supports === 'fraud');
-  const legit = ev.filter(e => e.supports !== 'fraud');
-  const [head, ...rest] = splitSummary(c.summary);
-  const tagcol = {approve:'var(--green)', escalate:'var(--amber)', block:'var(--red)'}[c.recommendation];
-  let h = `<p class="concl"><span class="tag" style="background:${tagcol}22;color:${tagcol}">`+
-          `${c.recommendation.toUpperCase()}</span>${esc(head)}</p>`;
-  if(fraud.length){
-    h += `<div class="sec-t fraud">⚑ Concerning evidence</div>`;
-    h += fraud.map(evRow).join('');
-  }
-  if(legit.length){
-    h += `<div class="sec-t legit">✓ Exculpatory / neutral evidence</div>`;
-    h += legit.map(evRow).join('');
-  }
-  if(rest.length) h += `<div class="prose">${esc(rest.join(' '))}</div>`;
-  h += `<div class="meta"><span><b>Typology:</b> ${c.typology || '—'}</span>`+
-       `<span><b>Confidence:</b> ${(c.confidence*100).toFixed(0)}%</span>`+
-       `<span><b>Model:</b> ${c._meta.model}</span></div>`;
+  if(!s.case) return `<div class="live-tail"><span class="spin"></span> still investigating — open “Agent activity”.</div>`;
+  const c=s.case, ev=c.evidence||[];
+  const fraud=ev.filter(e=>e.supports==='fraud'), legit=ev.filter(e=>e.supports!=='fraud');
+  const [head,...rest]=splitSummary(c.summary);
+  const col={approve:'var(--green)',escalate:'var(--amber)',block:'var(--red)'}[c.recommendation];
+  let h=`<p class="concl"><span class="tag" style="background:${col}22;color:${col}">${c.recommendation.toUpperCase()}</span>${esc(head)}</p>`;
+  if(fraud.length) h+=`<div class="sec-t fraud">⚑ Concerning evidence</div>`+fraud.map(evRow).join('');
+  if(legit.length) h+=`<div class="sec-t legit">✓ Exculpatory / neutral evidence</div>`+legit.map(evRow).join('');
+  if(rest.length) h+=`<div class="prose">${esc(rest.join(' '))}</div>`;
+  h+=`<div class="meta"><span><b>Typology:</b> ${c.typology||'—'}</span>`+
+     `<span><b>Confidence:</b> ${(c.confidence*100).toFixed(0)}%</span>`+
+     `<span><b>Model:</b> ${c._meta.model}</span>`+
+     `<span><b>Prompt:</b> ${c._meta.prompt_version}</span></div>`;
   return h;
 }
-function evRow(e){ return `<div class="ev"><span class="k">${esc(e.label)}</span><span class="val">${esc(e.value)}</span></div>`; }
-
+const evRow = e => `<div class="ev"><span class="k">${esc(e.label)}</span><span class="val">${esc(e.value)}</span></div>`;
 function splitSummary(txt){
-  txt = (txt||'').replace(/^(approve|block|escalate)\b[:\-—\s]*/i,'');
-  const m = txt.match(/^(.*?[.!?])\s+(.*)$/s);
-  return m ? [m[1], m[2]] : [txt];
+  txt=(txt||'').replace(/^(approve|block|escalate)\b[:\-—\s]*/i,'');
+  const m=txt.match(/^(.*?[.!?])\s+(.*)$/s);
+  return m?[m[1],m[2]]:[txt];
 }
-
 function activityHTML(s){
   if(!s.steps.length) return `<div class="live-tail"><span class="spin"></span> waiting for the agent’s first move…</div>`;
-  let h = s.steps.map((x, n) => {
-    const live = !x.done && s.phase==='busy';
-    const args = x.args ? Object.entries(x.args).map(([k,v])=>`${k}=${v}`).join(', ') : '';
-    return `<div class="step ${live?'live':''}">`+
-      `<span class="n">${n+1}</span>`+
-      `<div><div class="lab">${esc(x.label)}</div>`+
-      (args ? `<div class="args">${esc(args)}</div>` : '')+
-      `</div>${x.done ? '<span class="ck">✓</span>' : (live?'<span class="spin"></span>':'')}</div>`;
+  let h=s.steps.map((x,n)=>{
+    const live=!x.done&&s.phase==='busy';
+    const args=x.args?Object.entries(x.args).map(([k,v])=>`${k}=${v}`).join(', '):'';
+    return `<div class="step ${live?'live':''}"><span class="n">${n+1}</span>`+
+      `<div><div class="lab">${esc(x.label)}</div>${args?`<div class="args">${esc(args)}</div>`:''}</div>`+
+      `${x.done?'<span class="ck">✓</span>':(live?'<span class="spin"></span>':'')}</div>`;
   }).join('');
-  if(s.phase === 'busy') h += `<div class="live-tail"><span class="spin"></span> thinking…</div>`;
+  if(s.phase==='busy') h+=`<div class="live-tail"><span class="spin"></span> thinking…</div>`;
   return h;
+}
+/* ---- ask the agent ---- */
+function askHTML(s){
+  if(!s.case) return `<div class="note">Chat opens once the investigation is filed.</div>`;
+  let h = `<div class="chatlog" id="chatlog">`;
+  for(const m of s.chat){
+    if(m.role==='user') h+=`<div class="msg user">${esc(m.content)}</div>`;
+    else h+=`<div class="msg agent">${m.tools?.length?m.tools.map(t=>`<div class="toolline">⚙ ${esc(t)}</div>`).join(''):''}${esc(m.content)}</div>`;
+  }
+  if(s.asking) h+=`<div class="msg agent" id="liveMsg">${(s.liveTools||[]).map(t=>`<div class="toolline">⚙ ${esc(t)}</div>`).join('')}<span class="spin" style="display:inline-block"></span></div>`;
+  h+=`</div><div class="chatbox">
+    <input id="askInput" placeholder="Ask about this case… (agent can run live graph queries)"
+      onkeydown="if(event.key==='Enter')sendAsk(${openIdx})" ${s.asking?'disabled':''}>
+    <button class="primary" onclick="sendAsk(${openIdx})" ${s.asking?'disabled':''}>Ask</button>
+  </div>
+  <div class="note">Answers cite tool-derived facts as-of the alert time. The agent has no
+    access to ground-truth labels — the final call is yours.</div>`;
+  return h;
+}
+async function sendAsk(i){
+  const s=S[i], inp=$('askInput'); const q=(inp?.value||'').trim(); if(!q||s.asking) return;
+  const history=s.chat.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content}));
+  s.chat.push({role:'user',content:q}); s.asking=true; s.liveTools=[]; renderDrawer(i);
+  await sseFetch(`/api/cases/${s.case.case_id}/ask`, {question:q, history}, e=>{
+    if(e.type==='tool'){ s.liveTools.push(e.label); if(openIdx===i&&tab==='ask') renderDrawer(i); }
+    else if(e.type==='done'){ s.chat.push({role:'agent',content:e.answer,tools:s.liveTools}); }
+    else if(e.type==='error'){ s.chat.push({role:'agent',content:'⚠ '+e.message,tools:[]}); }
+  });
+  s.asking=false; s.liveTools=[];
+  if(openIdx===i&&tab==='ask') renderDrawer(i);
+}
+
+/* =============================== RULE LAB =============================== */
+async function loadReports(){          // reports drive the missed-case table pills
+  const [missed, reports] = await Promise.all([
+    (await fetch('/api/missed')).json(), (await fetch('/api/reports')).json()]);
+  const saved = await (await fetch('/api/rules')).json();
+  const ruled = new Set(saved.flatMap(r=>r.source_report_ids||[]));
+  const reportBySubject = {};
+  reports.forEach(r=>reportBySubject[r.subject_account]=r);
+  window._MISSED = missed; window._REPORTS = reportBySubject; window._RULED = ruled;
+  $('missedBody').innerHTML = missed.length ? missed.map(m=>{
+    const rep = reportBySubject[m.suggested_subject];
+    const hasRule = rep && ruled.has(rep.report_id);
+    return `<tr class="row in clickable ${window._MSEL===m.attempt_id?'msel':''}" id="mrow${m.attempt_id}"
+        onclick="selectMissed(${m.attempt_id})">`+
+      `<td class="mono">#${m.attempt_id}</td>`+
+      `<td class="mono acct">${m.suggested_subject}</td>`+
+      `<td class="mono">${m.window_start} → ${m.window_end}</td>`+
+      `<td class="mono">${m.n_accounts}${hasRule?' <span class="pill p-done">✓</span>':''}</td></tr>`;
+  }).join('') : '<tr><td colspan="4" class="empty">no missed cases on file</td></tr>';
+  if(missed.length) selectMissed(window._MSEL ?? missed[0].attempt_id);
+}
+function selectMissed(attemptId){
+  const m = (window._MISSED||[]).find(x=>x.attempt_id===attemptId);
+  if(!m) return;
+  window._MSEL = attemptId;
+  document.querySelectorAll('#missedBody tr').forEach(tr=>tr.classList.remove('msel'));
+  $('mrow'+attemptId)?.classList.add('msel');
+  const rep = (window._REPORTS||{})[m.suggested_subject];
+  const hasRule = rep && (window._RULED||new Set()).has(rep.report_id);
+  $('missedCtx').innerHTML =
+    `<div class="mono2" style="font-size:12px;color:var(--faint)">case #${m.attempt_id}</div>`+
+    `<div style="margin:6px 0 2px;font-family:ui-monospace,Menlo,monospace;font-size:15px">${m.suggested_subject}</div>`+
+    `<div class="meta" style="margin-top:8px"><span><b>Window:</b> ${m.window_start} → ${m.window_end}</span>`+
+    `<span><b>Ring size:</b> ${m.n_accounts} accounts</span></div>`+
+    `<div class="rat" style="margin-top:12px;line-height:1.65;font-size:13px;color:var(--ink)">${esc(m.context||'')}</div>`+
+    `<div style="margin-top:16px">${hasRule
+      ? '<span class="pill p-done">rule saved for this case</span>'
+      : `<button class="primary" onclick="proposeMissed(${m.attempt_id})">Propose rule</button>`}</div>`;
+}
+async function proposeMissed(attemptId){
+  const m = (window._MISSED||[]).find(x=>x.attempt_id===attemptId);
+  if(!m) return;
+  let rep = (window._REPORTS||{})[m.suggested_subject];
+  if(!rep){                                   // file the victim report automatically
+    const res = await fetch('/api/reports',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({subject_account:m.suggested_subject,
+        window_start:m.window_start, window_end:m.window_end,
+        description: m.context || `victim-reported fraud on ${m.suggested_subject}`})});
+    rep = await res.json();
+    if(rep.error){ toast('⚠ '+rep.error); return; }
+  }
+  propose(rep.report_id);
+}
+async function loadRules(){
+  const rs = await (await fetch('/api/rules')).json();
+  $('ruleList').innerHTML = rs.map(r =>
+    `<div class="list-item" style="padding:6px 2px;font-size:12px">`+
+    `<span class="mono2" style="min-width:150px;color:var(--ink)">${r.rule.name}</span>`+
+    `<span class="hint" style="margin:0">${r.rule.conjuncts?r.rule.conjuncts.map(c=>`${c.feature}${c.op}${c.threshold}`).join(' ∧ '):r.rule.subject_side+' · w='+r.rule.weight}</span>`+
+    `<span style="flex:1"></span>`+
+    `<span class="pill ${r.provenance==='agent_proposed'?'p-new':'p-off'}">${r.provenance==='agent_proposed'?'agent':'built-in'}</span></div>`
+  ).join('');
+}
+let labCurrent = null;
+function stageHTML(stages){
+  return stages.map(s =>
+    `<div class="stage ${s.state}"><span class="ic">${
+      s.state==='done'?'✓':s.state==='live'?'<span class="spin" style="display:inline-block"></span>':'○'
+    }</span>${esc(s.label)}</div>`).join('');
+}
+async function propose(reportId){
+  labCurrent = {stages:[], rule:null, backtest:null, reportId};
+  $('labDraft').innerHTML=''; $('labBacktest').innerHTML='';
+  const setStage=(label,state)=>{
+    const st=labCurrent.stages; const last=st[st.length-1];
+    if(last&&last.state==='live') last.state='done';
+    if(label) st.push({label,state});
+    $('labStages').innerHTML = stageHTML(st);
+  };
+  await sseFetch('/api/rule_lab/propose', {report_id:reportId}, e=>{
+    if(e.type==='resolving') setStage(e.label,'live');
+    else if(e.type==='resolved') setStage(`Resolved ${e.n_txns} transactions in the window`,'done');
+    else if(e.type==='proposing') setStage(e.label,'live');
+    else if(e.type==='rule_draft'){ labCurrent.rule=e.rule; $('labDraft').innerHTML=ruleCardHTML(e.rule); }
+    else if(e.type==='revising') setStage('Validator rejected the draft — agent revising','live');
+    else if(e.type==='backtesting') setStage(e.label,'live');
+    else if(e.type==='done'){ setStage(null,null); labCurrent.rule=e.rule; labCurrent.backtest=e.backtest;
+      $('labDraft').innerHTML=ruleCardHTML(e.rule);
+      $('labBacktest').innerHTML=backtestHTML(e.backtest, reportId); }
+    else if(e.type==='error'){ setStage('✕ '+e.message,'done'); toast('⚠ '+e.message); }
+  });
+}
+function ruleCardHTML(r){
+  return `<div class="rulecard"><span class="nm">${esc(r.name)}</span>
+    <span class="hint">indicts the ${r.subject_side} · weight ${r.weight}</span>
+    <div class="cond">${r.conjuncts.map(c=>`${c.feature} ${c.op} ${c.threshold}`).join('  ∧  ')}</div>
+    <div class="sec-t" style="color:var(--dim)">Agent's reasoning</div>
+    <div class="rat" style="line-height:1.65;white-space:pre-wrap">${esc(r.rationale||'')}</div></div>`;
+}
+function backtestHTML(b, reportId){
+  const cell=(v,k)=>`<div class="bt"><div class="v">${v}</div><div class="k">${k}</div></div>`;
+  return `<div class="rulecard">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="hint">Simulation results — 5M transactions, 17 days. Your call: is the tradeoff worth it?</span>
+    </div>
+    <div class="btrow">
+      ${cell(b.catches_case?'YES':'NO','catches this case')}
+      ${cell('+'+b.new_alerts_per_day,'new alerts / day')}
+      ${cell((b.precision*100).toFixed(1)+'%','precision')}
+      ${cell((b.overlap_rate*100).toFixed(1)+'%','overlap_rate')}
+    </div>
+    <div class="note">precision = share of the ${b.new_cases} new alerts that are real fraud
+      (${b.real_in_new} real) · overlap_rate = duplication with existing rules' alerts</div>
+    <div style="margin-top:12px">
+      <button class="primary" onclick="saveRule()">Save rule</button>
+      <span class="hint">saved disabled by default; provenance = the victim report</span>
+    </div>
+  </div>`;
+}
+async function saveRule(){
+  const res = await fetch('/api/rules', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({rule:labCurrent.rule, backtest:labCurrent.backtest,
+                          report_id:labCurrent.reportId})});
+  const r = await res.json();
+  if(r.error){ toast('⚠ '+r.error); return; }
+  toast(`Rule ${labCurrent.rule.name} saved`);
+  loadRules(); loadReports();
+}
+
+/* ================================ TUNING ================================ */
+async function loadFailures(){
+  const fs = await (await fetch('/api/tuning/failures')).json();
+  window._FAILS = fs;
+  $('failBody').innerHTML = fs.length ? fs.map(f =>
+    `<tr class="row in"><td class="mono">${f.case_id}</td>`+
+    `<td><span class="verdict ${'v-'+f.old_recommendation}" style="font-size:11px">${f.old_recommendation} ${(f.old_confidence*100).toFixed(0)}%</span></td>`+
+    `<td><span class="labchip">🏷 ${f.human_label}</span></td>`+
+    `<td><span class="pill ${f.severe?'p-new':'p-off'}">${f.severe?f.failure_type.replace('_',' '):'mild'}</span></td>`+
+    `<td>${f.data_ceiling?'<span class="ceil">CEILING</span>':
+          f.rerun_status?`<span class="outc o-${f.rerun_status}">${f.rerun_status.replace('_',' ')}</span>`:'—'}</td></tr>`
+  ).join('') : '<tr><td colspan="5" class="empty">No disagreements yet — label cases in the Queue.</td></tr>';
+  $('reviewBtn').disabled = !fs.length;
+}
+
+let REVIEW = null;    // the agent's proposed adaptation (awaiting approval)
+async function reviewAll(){
+  const fs = window._FAILS || [];
+  if(!fs.length) return;
+  $('reviewBtn').disabled = true;
+  const flow = $('reviewFlow');
+  flow.innerHTML = `<div class="stage live"><span class="ic"><span class="spin" style="display:inline-block"></span></span>
+    Re-reading ${fs.length} disagreed case(s)…</div><div id="refCards"></div><div id="refSynth"></div>`;
+  const refDivs = {};
+  await sseFetch('/api/tuning/review', {}, e=>{
+    if(e.type==='reflect_start'){
+      const d=document.createElement('div'); d.className='rulecard';
+      d.innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="mono2">${e.case_id}</span>
+          <span class="verdict v-${e.old.recommendation}" style="font-size:11px">I said ${e.old.recommendation} ${(e.old.confidence*100).toFixed(0)}%</span>
+          <span>→</span><span class="labchip">🏷 analyst: ${e.label}</span>
+          <span class="spin" style="margin-left:auto"></span></div>
+        <div class="rat" style="margin-top:9px;line-height:1.65;min-height:18px"></div>`;
+      $('refCards').appendChild(d);
+      refDivs[e.case_id]=d; d.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    else if(e.type==='reflect_delta'){
+      const d=refDivs[e.case_id]; if(d) d.querySelector('.rat').textContent += e.text;
+    }
+    else if(e.type==='reflect_done'){
+      const d=refDivs[e.case_id]; if(d){ const sp=d.querySelector('.spin'); if(sp) sp.outerHTML='<span class="ck" style="margin-left:auto">✓</span>'; }
+    }
+    else if(e.type==='synthesizing'){
+      $('refSynth').innerHTML=`<div class="stage live"><span class="ic"><span class="spin" style="display:inline-block"></span></span>${esc(e.label)}</div>`;
+    }
+    else if(e.type==='done'){ REVIEW=e.review; $('refSynth').innerHTML=adaptationHTML(e.review); }
+    else if(e.type==='error'){ $('refSynth').innerHTML=`<div class="note">⚠ ${esc(e.message)}</div>`; }
+  });
+  $('reviewBtn').disabled = false;
+}
+function adaptationHTML(r){
+  return `<div class="sec-t" style="color:var(--red);margin-top:18px">⚑ Error patterns I found in my own work</div>`+
+    r.error_patterns.map(p=>`<div class="ev"><span class="val">• ${esc(p)}</span></div>`).join('')+
+    `<div class="sec-t" style="color:var(--blue);margin-top:16px">↻ How my reasoning will change</div>`+
+    `<div class="rat" style="line-height:1.65;color:var(--ink)">${esc(r.summary)}</div>`+
+    `<div class="sec-t" style="color:var(--dim);margin-top:16px">Correction cards (appended to my prompt if you approve)</div>`+
+    r.cards.map(c=>`<div class="rulecard"><span class="mono2" style="font-size:11px">${esc(c.case_id)}</span>
+      <div class="rat" style="margin-top:6px;line-height:1.6">${esc(c.text)}</div></div>`).join('')+
+    `<div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+      <button class="primary" onclick="approveReview()">✓ Approve &amp; install</button>
+      <button class="ghost" onclick="discardReview()">Discard</button>
+      <span class="hint">nothing changes until you approve</span>
+    </div><div id="installStamp"></div>`;
+}
+async function approveReview(){
+  if(!REVIEW) return;
+  const res = await fetch('/api/tuning/approve',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({cards:REVIEW.cards, error_patterns:REVIEW.error_patterns,
+                          summary:REVIEW.summary})});
+  const r = await res.json();
+  if(r.error){ toast('⚠ '+r.error); return; }
+  $('installStamp').innerHTML =
+    `<div class="stage done" style="margin-top:10px"><span class="ic">✓</span>
+     Installed as prompt v3+ex${r.version} — ${r.n_cards} correction card(s) now apply to every new investigation</div>`;
+  $('verifyCard').hidden = false;
+  toast(`Approved — prompt v3+ex${r.version} installed`);
+}
+function discardReview(){ REVIEW=null; $('reviewFlow').innerHTML=
+  '<div class="note">Discarded. The agent’s prompt is unchanged.</div>'; }
+
+let TUNE = null;   // verify-run results
+async function verifyAll(){
+  const fs = window._FAILS || [];
+  $('verifyBtn').disabled = true;
+  TUNE = {results:[], sel:null};
+  drawTuneResults();
+  for(const f of fs){
+    if(f.data_ceiling) continue;
+    const row = {case_id:f.case_id, running:true, steps:0};
+    TUNE.results.push(row); drawTuneResults();
+    await sseFetch(`/api/tuning/rerun/${f.case_id}`, {}, e=>{
+      if(e.type==='tool'){ row.steps++; drawTuneResults(); }
+      else if(e.type==='done'){ row.running=false; row.done=e; TUNE.sel=row.case_id; drawTuneResults(); }
+      else if(e.type==='error'){ row.running=false; row.error=e.message; drawTuneResults(); }
+    });
+  }
+  const fixed = TUNE.results.filter(r=>r.done&&r.done.outcome==='flipped_correct').length;
+  toast(`Verification done — ${fixed}/${TUNE.results.length} disagreement(s) now resolved`);
+  $('verifyBtn').disabled = false;
+  loadFailures();
+}
+function drawTuneResults(){
+  if(!TUNE) return;
+  $('tuneResults').innerHTML = TUNE.results.map(r=>{
+    if(r.running) return `<div class="resrow"><span class="mono2">${r.case_id}</span>`+
+      `<span class="spin"></span><span class="hint">re-investigating… ${r.steps} tool call(s)</span></div>`;
+    if(r.error) return `<div class="resrow"><span class="mono2">${r.case_id}</span>`+
+      `<span class="hint">⚠ ${esc(r.error)}</span></div>`;
+    const e=r.done;
+    return `<div class="resrow ${TUNE.sel===r.case_id?'sel':''}" onclick="selTune('${r.case_id}')">`+
+      `<span class="mono2">${r.case_id}</span>`+
+      `<span class="outc o-${e.outcome}">${e.outcome.replace('_',' ')}</span>`+
+      `<span class="hint">${e.diff.recommendation[0]} ${(e.diff.confidence[0]*100).toFixed(0)}% → `+
+      `${e.diff.recommendation[1]} ${(e.diff.confidence[1]*100).toFixed(0)}%</span>`+
+      (e.data_ceiling?'<span class="ceil">DATA CEILING</span>':'')+`</div>`;
+  }).join('');
+  const sel = TUNE.results.find(r=>r.case_id===TUNE.sel && r.done);
+  $('rerunPanel').innerHTML = sel ? diffHTML(sel.done) : '';
+}
+function selTune(id){ TUNE.sel=id; drawTuneResults(); }
+function diffHTML(e){
+  const o=e.old_case, n=e.new_case;
+  const col = c => ({approve:'var(--green)',escalate:'var(--amber)',block:'var(--red)'}[c.recommendation]);
+  const rep = (c,cls,title) => `<div class="diffcol ${cls}"><h4>${title} · prompt ${c._meta.prompt_version}</h4>
+    <p class="concl" style="font-size:13.5px"><span class="tag" style="background:${col(c)}22;color:${col(c)}">${c.recommendation.toUpperCase()}</span>
+    conf ${(c.confidence*100).toFixed(0)}% · ${c.typology||'no typology'}</p>
+    <div class="rat" style="font-size:12px;color:var(--dim)">${esc(splitSummary(c.summary)[0])}</div></div>`;
+  return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="outc o-${e.outcome}">${e.outcome.replace('_',' ').toUpperCase()}</span>
+      <span class="hint">human label: ${e.diff.human_label} · attempt ${e.attempt}</span>
+      ${e.data_ceiling?'<span class="ceil">DATA CEILING</span>':''}
+    </div>
+    <div class="diffgrid">${rep(o,'','Old report')}${rep(n,'new','New report')}</div>
+    ${e.outcome==='regressed'?`<div class="note">⚠ Regression: the old verdict was correct and the new one is not — shown, not hidden. Cards are capped at 4 and the benchmark guards against this.</div>`:''}
+    ${e.outcome==='still_wrong'?`<div class="note">The updated prompt did not fix this case${e.data_ceiling?' — twice now: stamped as data-ceiling (the transaction graph lacks the signal, a measured finding of this project)':''}.</div>`:''}`;
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
