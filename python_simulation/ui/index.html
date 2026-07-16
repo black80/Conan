@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AML Analyst — live agent</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#141b24; --panel2:#0f151d; --line:#232d3a;
+    --ink:#e6edf3; --dim:#8b97a6; --faint:#5b6673;
+    --blue:#4a9eff; --green:#3fb950; --amber:#d29922; --red:#f75c58;
+    --chip:#1c2530;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px}
+  header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding-bottom:16px;border-bottom:1px solid var(--line)}
+  h1{font-size:17px;margin:0;font-weight:650;letter-spacing:.2px}
+  h1 .sub{color:var(--dim);font-weight:400;font-size:13px;margin-left:8px}
+  .spacer{flex:1}
+  button.start{background:var(--blue);color:#04101f;border:0;border-radius:7px;
+    padding:9px 18px;font-weight:650;font-size:13px;cursor:pointer}
+  button.start:disabled{opacity:.45;cursor:default}
+  .counters{display:flex;gap:8px;margin:16px 0 6px}
+  .counter{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:9px 13px;min-width:96px}
+  .counter .n{font-size:20px;font-weight:680;line-height:1}
+  .counter .l{font-size:11px;color:var(--dim);margin-top:4px;text-transform:uppercase;
+    letter-spacing:.4px}
+  .counter.busy .n{color:var(--blue)} .counter.close .n{color:var(--green)}
+  .counter.esc .n{color:var(--amber)} .counter.block .n{color:var(--red)}
+
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--faint);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line)}
+  td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr.row{opacity:0;transform:translateY(-4px);transition:opacity .4s,transform .4s,background .15s}
+  tr.row.in{opacity:1;transform:none}
+  tr.row.clickable{cursor:pointer}
+  tr.row.clickable:hover{background:var(--panel2)}
+  td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--dim);font-size:13px}
+  .acct{color:var(--ink)}
+  .rules span{display:inline-block;background:var(--chip);border:1px solid var(--line);
+    color:var(--dim);border-radius:5px;padding:1px 7px;font-size:11px;margin-right:4px;
+    font-family:ui-monospace,Menlo,monospace}
+  .status{display:flex;align-items:center;gap:8px;font-size:13px;min-height:22px}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .dot.new{background:var(--red)} .badge-ink{font-weight:600}
+  .spin{width:13px;height:13px;border-radius:50%;border:2px solid #2c3947;
+    border-top-color:var(--blue);animation:spin .7s linear infinite;flex:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .action{color:var(--dim);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;max-width:340px}
+  .verdict{display:inline-flex;align-items:center;gap:6px;font-weight:640;
+    padding:3px 9px;border-radius:6px;font-size:12.5px}
+  .v-approve{background:rgba(63,185,80,.14);color:var(--green)}
+  .v-escalate{background:rgba(210,153,34,.16);color:var(--amber)}
+  .v-block{background:rgba(247,92,88,.16);color:var(--red)}
+  .hint{color:var(--faint);font-size:12px;margin-left:8px}
+  .empty{color:var(--faint);padding:40px 12px;text-align:center}
+
+  /* drawer */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;
+    transition:opacity .25s;z-index:40}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,94vw);
+    background:var(--panel);border-left:1px solid var(--line);z-index:50;
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column}
+  .drawer.open{transform:none}
+  .dh{padding:18px 20px;border-bottom:1px solid var(--line)}
+  .dh .cid{font-family:ui-monospace,Menlo,monospace;color:var(--faint);font-size:12px}
+  .dh .row2{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .dh .acct2{font-family:ui-monospace,Menlo,monospace;font-size:15px}
+  .truth{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px}
+  .t-good{background:rgba(63,185,80,.14);color:var(--green)}
+  .t-bad{background:rgba(247,92,88,.16);color:var(--red)}
+  .t-neu{background:rgba(210,153,34,.16);color:var(--amber)}
+  .x{margin-left:auto;background:none;border:0;color:var(--dim);font-size:22px;
+    cursor:pointer;line-height:1}
+  .tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid var(--line)}
+  .tab{padding:11px 4px;margin-right:18px;color:var(--dim);cursor:pointer;font-size:13px;
+    border-bottom:2px solid transparent;font-weight:550}
+  .tab.on{color:var(--ink);border-bottom-color:var(--blue)}
+  .body{padding:20px;overflow-y:auto;flex:1}
+  .concl{font-size:15px;font-weight:600;line-height:1.45;margin:0 0 16px}
+  .concl .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.4px;
+    padding:2px 8px;border-radius:5px;margin-right:8px;vertical-align:middle}
+  .sec-t{font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:650;
+    margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+  .sec-t.fraud{color:var(--red)} .sec-t.legit{color:var(--green)}
+  .ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--panel2)}
+  .ev .k{color:var(--dim);min-width:150px;font-size:12.5px}
+  .ev .val{color:var(--ink);font-size:12.5px}
+  .prose{color:var(--dim);font-size:13px;line-height:1.6;margin-top:16px;
+    padding-top:14px;border-top:1px solid var(--line)}
+  .meta{display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--faint)}
+  .meta b{color:var(--dim);font-weight:600}
+  /* activity tab */
+  .step{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--panel2);
+    align-items:flex-start}
+  .step .n{color:var(--faint);font-family:ui-monospace,Menlo,monospace;font-size:12px;
+    min-width:20px;text-align:right}
+  .step .lab{font-size:13px}
+  .step .args{color:var(--faint);font-family:ui-monospace,Menlo,monospace;font-size:11px;
+    margin-top:2px}
+  .step.live .lab{color:var(--blue)}
+  .step .ck{color:var(--green);margin-left:auto;font-size:12px}
+  .live-tail{display:flex;align-items:center;gap:8px;color:var(--blue);
+    font-size:13px;padding:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>AML Analyst <span class="sub">live agent triage · IBM HI-Small</span></h1>
+    </div>
+    <div class="spacer"></div>
+    <span id="statusLine" class="hint">connecting…</span>
+    <button id="startBtn" class="start" disabled>Start shift</button>
+  </header>
+
+  <div class="counters">
+    <div class="counter busy"><div class="n" id="cBusy">0</div><div class="l">Investigating</div></div>
+    <div class="counter close"><div class="n" id="cClose">0</div><div class="l">Auto-closed</div></div>
+    <div class="counter esc"><div class="n" id="cEsc">0</div><div class="l">Escalated</div></div>
+    <div class="counter block"><div class="n" id="cBlock">0</div><div class="l">Blocked</div></div>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th style="width:80px">Time</th>
+      <th style="width:120px">Alert</th>
+      <th style="width:120px">Account</th>
+      <th style="width:230px">Rules fired</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody id="tbody">
+      <tr><td colspan="5" class="empty" id="emptyRow">Press “Start shift” to begin the day’s alert stream.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh">
+    <div class="cid" id="dCid"></div>
+    <div class="row2">
+      <span class="acct2" id="dAcct"></span>
+      <span id="dVerdict"></span>
+      <span id="dTruth"></span>
+      <button class="x" onclick="closeDrawer()">×</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" id="tabSum" onclick="swap('sum')">Case summary</div>
+    <div class="tab" id="tabAct" onclick="swap('act')">Agent activity</div>
+  </div>
+  <div class="body" id="dBody"></div>
+</aside>
+
+<script>
+const REVEAL_MS = 7000;          // gap between alerts appearing (slower stream)
+const NEW_HOLD_MS = 1400;        // how long a row shows "New alert" before the agent starts
+let ALERTS = [], S = [], openIdx = null, tab = 'sum';
+
+const $ = id => document.getElementById(id);
+const fmtTime = ts => ts.slice(11,16);
+const esc = s => (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+async function boot(){
+  try{
+    ALERTS = await (await fetch('/api/alerts')).json();
+    $('statusLine').textContent = ALERTS.length + ' alerts queued · Haiku agent';
+    $('startBtn').disabled = false;
+  }catch(e){
+    $('statusLine').textContent = 'backend not reachable — start server.py';
+  }
+}
+boot();
+
+$('startBtn').onclick = () => {
+  $('startBtn').disabled = true;
+  $('emptyRow')?.remove();
+  S = ALERTS.map(a => ({a, phase:'queued', action:'', steps:[], case:null, truth:null}));
+  S.forEach((_, i) => addRow(i));
+  ALERTS.forEach((_, i) => setTimeout(() => reveal(i), i * REVEAL_MS));
+};
+
+function addRow(i){
+  const a = ALERTS[i];
+  const tr = document.createElement('tr');
+  tr.className = 'row'; tr.id = 'row'+i;
+  tr.innerHTML =
+    `<td class="mono">${fmtTime(a.timestamp)}</td>`+
+    `<td class="mono">${a.alert_id}</td>`+
+    `<td class="mono acct">${a.subject_account}</td>`+
+    `<td class="rules">${a.rules_fired.slice(0,2).map(r=>`<span>${r}</span>`).join('')}</td>`+
+    `<td><div class="status"></div></td>`;
+  $('tbody').appendChild(tr);
+  tr.querySelector('.status').id = 'st'+i;
+}
+
+function reveal(i){
+  $('row'+i).classList.add('in');
+  S[i].phase = 'new';
+  paint(i);
+  setTimeout(() => startInvestigation(i), NEW_HOLD_MS);
+}
+
+function startInvestigation(i){
+  S[i].phase = 'busy'; S[i].action = 'Opening the case…';
+  $('row'+i).classList.add('clickable');
+  $('row'+i).onclick = () => openDrawer(i);
+  paint(i); counters();
+  const es = new EventSource('/api/investigate?id=' + encodeURIComponent(ALERTS[i].alert_id));
+  es.onmessage = ev => onEvent(i, JSON.parse(ev.data), es);
+  es.onerror = () => { es.close(); if(S[i].phase==='busy'){ S[i].phase='error'; paint(i);} };
+}
+
+function onEvent(i, ev, es){
+  const s = S[i];
+  if(ev.type === 'tool'){
+    s.action = ev.label;
+    s.steps.push({label: ev.label, args: ev.args, done: false});
+  } else if(ev.type === 'tool_done'){
+    const last = [...s.steps].reverse().find(x => !x.done);
+    if(last) last.done = true;
+  } else if(ev.type === 'filing'){
+    s.action = ev.label;
+    s.steps.push({label: ev.label, args: null, done: false, filing: true});
+  } else if(ev.type === 'done'){
+    es.close();
+    s.case = ev.case; s.truth = ev.truth; s.phase = 'done';
+    s.steps.forEach(x => x.done = true);
+  } else if(ev.type === 'error'){
+    es.close(); s.phase = 'error'; s.action = ev.message;
+  }
+  paint(i);
+  if(openIdx === i) renderDrawer(i);
+  if(ev.type === 'done') counters();
+}
+
+function paint(i){
+  const s = S[i], el = $('st'+i); if(!el) return;
+  if(s.phase === 'new'){
+    el.innerHTML = `<span class="dot new"></span><span class="badge-ink">New alert</span>`;
+  } else if(s.phase === 'busy'){
+    el.innerHTML = `<span class="spin"></span><span class="action">${esc(s.action)}</span>`;
+  } else if(s.phase === 'error'){
+    el.innerHTML = `<span class="dot new"></span><span class="action">investigation failed</span>`;
+  } else if(s.phase === 'done'){
+    el.innerHTML = verdictHTML(s.case.recommendation) +
+      `<span class="hint">${s.case._meta.tool_calls} tools · click to open</span>`;
+  }
+}
+
+function verdictHTML(rec){
+  const m = {approve:['v-approve','✓ Auto-closed'], escalate:['v-escalate','⬆ Escalated'],
+             block:['v-block','⛔ Blocked']}[rec] || ['v-escalate','⬆ Escalated'];
+  return `<span class="verdict ${m[0]}">${m[1]}</span>`;
+}
+
+function counters(){
+  const c = {busy:0, approve:0, escalate:0, block:0};
+  S.forEach(s => {
+    if(s.phase === 'busy') c.busy++;
+    if(s.phase === 'done') c[s.case.recommendation]++;
+  });
+  $('cBusy').textContent = c.busy; $('cClose').textContent = c.approve;
+  $('cEsc').textContent = c.escalate; $('cBlock').textContent = c.block;
+}
+
+/* ---- drawer ---- */
+function openDrawer(i){ openIdx = i; tab = S[i].phase==='done' ? 'sum' : 'act';
+  syncTabs(); renderDrawer(i); $('scrim').classList.add('open'); $('drawer').classList.add('open'); }
+function closeDrawer(){ openIdx = null; $('scrim').classList.remove('open'); $('drawer').classList.remove('open'); }
+function swap(t){ tab = t; syncTabs(); if(openIdx!=null) renderDrawer(openIdx); }
+function syncTabs(){ $('tabSum').classList.toggle('on', tab==='sum'); $('tabAct').classList.toggle('on', tab==='act'); }
+
+function renderDrawer(i){
+  const s = S[i], a = ALERTS[i];
+  $('dCid').textContent = (s.case ? s.case.case_id : 'CS-' + a.alert_id.replace('AL-','')) +
+    '  ·  ' + fmtTime(a.timestamp);
+  $('dAcct').textContent = a.subject_account;
+  $('dVerdict').innerHTML = s.case ? verdictHTML(s.case.recommendation) : '';
+  $('dTruth').innerHTML = s.truth ? truthHTML(s) : '';
+  $('tabAct').textContent = 'Agent activity' + (s.steps.length ? ` (${s.steps.length})` : '');
+  $('dBody').innerHTML = tab === 'sum' ? summaryHTML(s) : activityHTML(s);
+}
+
+function truthHTML(s){
+  const real = s.truth.real, rec = s.case.recommendation, kept = rec!=='approve';
+  let cls, txt;
+  if(real && kept){ cls='t-good'; txt='✓ caught — real laundering'; }
+  else if(real && !kept){ cls='t-bad'; txt='✕ missed — real laundering'; }
+  else if(!real && !kept){ cls='t-neu'; txt='• legit sent for review'; }
+  else { cls='t-good'; txt='✓ cleared — legitimate'; }
+  return `<span class="truth ${cls}">${txt}</span>`;
+}
+
+function summaryHTML(s){
+  if(!s.case) return `<div class="live-tail"><span class="spin"></span> The agent is still investigating — open “Agent activity” to watch it work.</div>`;
+  const c = s.case, ev = c.evidence || [];
+  const fraud = ev.filter(e => e.supports === 'fraud');
+  const legit = ev.filter(e => e.supports !== 'fraud');
+  const [head, ...rest] = splitSummary(c.summary);
+  const tagcol = {approve:'var(--green)', escalate:'var(--amber)', block:'var(--red)'}[c.recommendation];
+  let h = `<p class="concl"><span class="tag" style="background:${tagcol}22;color:${tagcol}">`+
+          `${c.recommendation.toUpperCase()}</span>${esc(head)}</p>`;
+  if(fraud.length){
+    h += `<div class="sec-t fraud">⚑ Concerning evidence</div>`;
+    h += fraud.map(evRow).join('');
+  }
+  if(legit.length){
+    h += `<div class="sec-t legit">✓ Exculpatory / neutral evidence</div>`;
+    h += legit.map(evRow).join('');
+  }
+  if(rest.length) h += `<div class="prose">${esc(rest.join(' '))}</div>`;
+  h += `<div class="meta"><span><b>Typology:</b> ${c.typology || '—'}</span>`+
+       `<span><b>Confidence:</b> ${(c.confidence*100).toFixed(0)}%</span>`+
+       `<span><b>Model:</b> ${c._meta.model}</span></div>`;
+  return h;
+}
+function evRow(e){ return `<div class="ev"><span class="k">${esc(e.label)}</span><span class="val">${esc(e.value)}</span></div>`; }
+
+function splitSummary(txt){
+  txt = (txt||'').replace(/^(approve|block|escalate)\b[:\-—\s]*/i,'');
+  const m = txt.match(/^(.*?[.!?])\s+(.*)$/s);
+  return m ? [m[1], m[2]] : [txt];
+}
+
+function activityHTML(s){
+  if(!s.steps.length) return `<div class="live-tail"><span class="spin"></span> waiting for the agent’s first move…</div>`;
+  let h = s.steps.map((x, n) => {
+    const live = !x.done && s.phase==='busy';
+    const args = x.args ? Object.entries(x.args).map(([k,v])=>`${k}=${v}`).join(', ') : '';
+    return `<div class="step ${live?'live':''}">`+
+      `<span class="n">${n+1}</span>`+
+      `<div><div class="lab">${esc(x.label)}</div>`+
+      (args ? `<div class="args">${esc(args)}</div>` : '')+
+      `</div>${x.done ? '<span class="ck">✓</span>' : (live?'<span class="spin"></span>':'')}</div>`;
+  }).join('');
+  if(s.phase === 'busy') h += `<div class="live-tail"><span class="spin"></span> thinking…</div>`;
+  return h;
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+</script>
+</body>
+</html>
