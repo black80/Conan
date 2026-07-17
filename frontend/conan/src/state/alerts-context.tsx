@@ -1,7 +1,9 @@
 import * as React from "react"
+import { useLocation } from "react-router"
 
 import { getAlerts, investigate as investigateApi } from "@/api/alerts"
 import type { Case, InvestigateEvent, QueueEntry, QueueLabel } from "@/api/types"
+import { playAlertSound } from "@/lib/alert-sound"
 
 type ConnectionStatus = "connecting" | "ready"
 
@@ -43,12 +45,31 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
     {}
   )
   const startedAlertIds = React.useRef<Set<string>>(new Set())
+  /** Alert ids seen on the previous poll; null until the first successful fetch so the
+   * existing queue never triggers a sound on initial load — only alerts that arrive after. */
+  const knownAlertIds = React.useRef<Set<string> | null>(null)
+  /** Only chime while the user is actually looking at a cases queue, not on Home/Settings/etc. */
+  const pathname = useLocation().pathname
+  const pathnameRef = React.useRef(pathname)
+  React.useEffect(() => {
+    pathnameRef.current = pathname
+  }, [pathname])
+
+  const applyAlerts = React.useCallback((data: QueueEntry[]) => {
+    const previouslyKnown = knownAlertIds.current
+    const hasNewAlert = previouslyKnown && data.some((entry) => !previouslyKnown.has(entry.alert_id))
+    if (hasNewAlert && pathnameRef.current.startsWith("/cases")) {
+      playAlertSound()
+    }
+    knownAlertIds.current = new Set(data.map((entry) => entry.alert_id))
+    setAlerts(data)
+  }, [])
 
   const refresh = React.useCallback(async () => {
     const data = await getAlerts()
-    setAlerts(data)
+    applyAlerts(data)
     setStatus("ready")
-  }, [])
+  }, [applyAlerts])
 
   React.useEffect(() => {
     let cancelled = false
@@ -58,7 +79,7 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
       getAlerts()
         .then((data) => {
           if (cancelled) return
-          setAlerts(data)
+          applyAlerts(data)
           setStatus("ready")
         })
         .catch(() => undefined)
@@ -73,7 +94,7 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
       cancelled = true
       if (timer) clearTimeout(timer)
     }
-  }, [])
+  }, [applyAlerts])
 
   const applyCase = React.useCallback((alertId: string, updatedCase: Case) => {
     setAlerts((prev) =>
