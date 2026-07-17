@@ -3,7 +3,7 @@ import { Loader2Icon } from "lucide-react"
 
 import { AlertsQueueTable } from "@/components/alerts-queue-table"
 import { CaseDrawer } from "@/components/case-drawer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAlerts } from "@/state/alerts-context"
 
 export function AiCasesPage() {
@@ -52,6 +52,7 @@ export function AiCasesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Agent queue</CardTitle>
+          <CardDescription>Every alert the agent has investigated, newest first.</CardDescription>
         </CardHeader>
         <CardContent>
           <AlertsQueueTable entries={alerts} onSelect={setSelected} />

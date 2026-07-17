@@ -4,7 +4,14 @@ import { Loader2Icon } from "lucide-react"
 import type { QueueEntry } from "@/api/types"
 import { AlertsQueueTable } from "@/components/alerts-queue-table"
 import { CaseDrawer } from "@/components/case-drawer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -44,23 +51,26 @@ export function InvestigatorCasesPage() {
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardHeader>
           <CardTitle>My queue</CardTitle>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Logged in as</span>
-            <Select value={analyst} onValueChange={(value) => value && setAnalyst(value)}>
-              <SelectTrigger size="sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ANALYSTS.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CardDescription>Cases assigned to you that are still open.</CardDescription>
+          <CardAction>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Logged in as</span>
+              <Select value={analyst} onValueChange={(value) => value && setAnalyst(value)}>
+                <SelectTrigger size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ANALYSTS.map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardAction>
         </CardHeader>
         <CardContent>
           <AlertsQueueTable

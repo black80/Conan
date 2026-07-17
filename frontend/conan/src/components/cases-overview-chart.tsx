@@ -1,6 +1,6 @@
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   type ChartConfig,
   ChartContainer,
@@ -32,6 +32,7 @@ export function CasesOverviewChart({ data }: { data: CasesOverviewPoint[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Cases closed by day</CardTitle>
+        <CardDescription>How closures split between the AI agent and investigators.</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[280px] w-full">

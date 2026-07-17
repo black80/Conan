@@ -5,7 +5,7 @@ import type { QueueEntry } from "@/api/types"
 import { CasesOverviewChart, type CasesOverviewPoint } from "@/components/cases-overview-chart"
 import { RecommendationBadge } from "@/components/recommendation-badge"
 import { StatCard } from "@/components/stat-card"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -96,6 +96,7 @@ export function HomePage() {
       <Card>
         <CardHeader>
           <CardTitle>My queue</CardTitle>
+          <CardDescription>A preview of open cases still awaiting a decision.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

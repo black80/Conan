@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/api/client"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAlerts } from "@/state/alerts-context"
 
 export function SettingsPage() {
@@ -10,6 +10,7 @@ export function SettingsPage() {
     <Card className="max-w-md">
       <CardHeader>
         <CardTitle>Backend connection</CardTitle>
+        <CardDescription>Where the frontend is reaching the agent backend.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <div className="flex items-center justify-between">

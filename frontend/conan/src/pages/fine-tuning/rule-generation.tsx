@@ -17,7 +17,7 @@ import { RuleDslCard } from "@/components/rule-dsl-card"
 import { TablePagination } from "@/components/table-pagination"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -237,6 +237,7 @@ export function RuleGenerationPage() {
       <Card>
         <CardHeader>
           <CardTitle>Missed cases</CardTitle>
+          <CardDescription>Fraud reports the current rules failed to flag.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -290,6 +291,7 @@ export function RuleGenerationPage() {
       <Card>
         <CardHeader>
           <CardTitle>Case context</CardTitle>
+          <CardDescription>Details for the selected missed case.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {!selected && <p className="text-sm text-muted-foreground">Select a missed case.</p>}
@@ -307,6 +309,7 @@ export function RuleGenerationPage() {
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Lab bench</CardTitle>
+          <CardDescription>Draft, edit, and backtest a proposed rule before saving it.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {proposeStream.status === "idle" && !editableRule && (
@@ -368,6 +371,7 @@ export function RuleGenerationPage() {
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Detection rules</CardTitle>
+          <CardDescription>Every rule in the registry, hand-written and agent-proposed.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

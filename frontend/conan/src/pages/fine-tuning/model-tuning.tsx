@@ -19,7 +19,14 @@ import { TablePagination } from "@/components/table-pagination"
 import { TypologyBadge } from "@/components/typology-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -197,14 +204,19 @@ export function ModelTuningPage() {
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
+        <CardHeader>
           <CardTitle>Disagreements</CardTitle>
-          <Button
-            onClick={runReview}
-            disabled={reviewStream.status === "streaming" || loading || failures.length === 0}
-          >
-            {reviewStream.status === "streaming" ? "Reviewing…" : "Self-review disagreements"}
-          </Button>
+          <CardDescription>
+            Cases where the agent's recommendation didn't match the analyst's label.
+          </CardDescription>
+          <CardAction>
+            <Button
+              onClick={runReview}
+              disabled={reviewStream.status === "streaming" || loading || failures.length === 0}
+            >
+              {reviewStream.status === "streaming" ? "Reviewing…" : "Self-review disagreements"}
+            </Button>
+          </CardAction>
         </CardHeader>
         <CardContent>
           <Table>
@@ -287,6 +299,9 @@ export function ModelTuningPage() {
         <Card>
           <CardHeader>
             <CardTitle>Agent self-review</CardTitle>
+            <CardDescription>
+              The agent explaining each disagreement and proposing a correction.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {derived.total !== null && !derived.result && (
@@ -373,18 +388,18 @@ export function ModelTuningPage() {
 
       {installedVersion !== null && (
         <Card>
-          <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardHeader>
             <CardTitle>Verify the change</CardTitle>
-            <Button onClick={runVerification} disabled={verifying}>
-              {verifying ? "Re-reviewing…" : "Re-review all cases"}
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <CardDescription>
               Re-investigates every disagreement with the newly installed correction cards and
               diffs the old verdict against the new one — regressions are shown, never hidden.
-            </p>
-          </CardContent>
+            </CardDescription>
+            <CardAction>
+              <Button onClick={runVerification} disabled={verifying}>
+                {verifying ? "Re-reviewing…" : "Re-review all cases"}
+              </Button>
+            </CardAction>
+          </CardHeader>
         </Card>
       )}
     </div>
