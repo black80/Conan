@@ -28,7 +28,9 @@ import json
 import os
 import queue
 import threading
+import uuid
 from datetime import date, datetime, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 REPO = Path(__file__).parent
@@ -60,7 +62,9 @@ import loop
 import store
 from agent import agent, chat, tools, tuning
 from system import rule_lab
-from system.rules import RULES
+from system.detector import detect
+from system.rules import RULES, load_thresholds
+from system.sampler import to_alert_json
 
 # Haiku v3 is the best-validated config (docs/RESULTS.md): evidence-ledger prompt,
 # model decides the action directly. Cheap enough to run live (~$0.03/case).
@@ -82,6 +86,10 @@ _ALERTS: list[dict] = []                        # the 8 alerts, time-ordered
 _LAUND: set[tuple[str, date]] = set()           # (account, day) laundering truth
 _EXISTING_CASE_DAYS: set[tuple[str, date]] = set()   # today's rules' full alert set
 _AGENT_SEM = threading.Semaphore(3)             # cap concurrent live agent runs
+_NFC_LOCK = threading.Lock()
+_NFC_STORE: dict = {}
+_NFC_SUBMISSIONS: dict[str, dict] = {}
+_THRESHOLDS: dict[str, float] | None = None
 
 
 def sse(event: dict) -> str:
@@ -111,14 +119,17 @@ def sse_response(worker) -> Response:
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
-def is_real(alert: dict) -> bool:
+def is_real(alert: dict) -> bool | None:
     """Post-hoc truth for the badge -- never shown to the agent."""
+    if alert["alert_id"].startswith("AL-NFC-"):
+        return None
     day = date.fromisoformat(alert["txn"]["timestamp"][:10])
     return (alert["subject_account"], day) in _LAUND
 
 
 def alert_by_id(alert_id: str) -> dict | None:
-    return next((a for a in _ALERTS if a["alert_id"] == alert_id), None)
+    with _NFC_LOCK:
+        return next((a for a in _ALERTS if a["alert_id"] == alert_id), None)
 
 
 def case_by_id(case_id: str) -> dict | None:
@@ -127,8 +138,10 @@ def case_by_id(case_id: str) -> dict | None:
 
 def load() -> None:
     """Load the graph once, pick the demo alerts, build the truth sets."""
+    global _THRESHOLDS
     print("loading transaction graph (~30s, ~3GB)...", flush=True)
     tools.init()
+    _THRESHOLDS = load_thresholds()
 
     by_id = {}
     all_case_days = set()
@@ -147,6 +160,10 @@ def load() -> None:
                     pl.nth(10).alias("il")).filter(pl.col("il") == 1).collect())
     _LAUND.update(la.select("sa", "day").iter_rows())
     _LAUND.update(la.select("ra", "day").iter_rows())
+    print(
+        f"NFC HIGH_AMOUNT threshold: {_THRESHOLDS['amount_paid']}",
+        flush=True,
+    )
     print(f"ready: {len(_ALERTS)} alerts, http://localhost:8000", flush=True)
 
 
@@ -161,13 +178,15 @@ def index():
 def api_alerts():
     """Alerts enriched with assignment, investigation, and label state -- the
     UI restores the whole queue from this one call."""
+    with _NFC_LOCK:
+        alerts = list(_ALERTS)
     labels = store.read_all(store.LABELS)
-    assigned = loop.assign_all(_ALERTS, labels)
+    assigned = loop.assign_all(alerts, labels)
     label_by_alert = {l["alert_id"]: l for l in labels}
     case_by_alert = {c["alert"]["alert_id"]: c
                      for c in store.latest_by(store.CASES, "case_id").values()}
     out = []
-    for a in _ALERTS:
+    for a in alerts:
         aid = a["alert_id"]
         case = case_by_alert.get(aid)
         lab = label_by_alert.get(aid)
@@ -184,6 +203,115 @@ def api_alerts():
                                            "labeled_by", "ts")}),
         })
     return jsonify(out)
+
+
+def _required_text(container: dict, key: str) -> str:
+    value = container.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{key} is required")
+    return value.strip()
+
+
+def _nfc_transaction(body: dict) -> tuple[str, dict]:
+    transaction_id = str(uuid.UUID(_required_text(body, "transaction_id")))
+    card = body.get("real_card_data")
+    anomaly = body.get("anomaly_context")
+    if not isinstance(card, dict) or not isinstance(anomaly, dict):
+        raise ValueError("real_card_data and anomaly_context are required")
+
+    pan = _required_text(card, "pan")
+    if not pan.isdigit() or not 12 <= len(pan) <= 19:
+        raise ValueError("pan must contain 12 to 19 digits")
+    timestamp_text = _required_text(body, "timestamp")
+    try:
+        timestamp = datetime.fromisoformat(timestamp_text.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise ValueError("timestamp must be ISO-8601") from error
+    if timestamp.tzinfo is None or timestamp.utcoffset() is None:
+        raise ValueError("timestamp must include a UTC offset")
+    timestamp = timestamp.astimezone(timezone.utc)
+
+    try:
+        amount = Decimal(str(anomaly.get("amount")))
+    except (InvalidOperation, TypeError, ValueError) as error:
+        raise ValueError("amount must be numeric") from error
+    if not amount.is_finite() or amount <= 0:
+        raise ValueError("amount must be positive")
+
+    currency = _required_text(anomaly, "currency").upper()
+    if len(currency) != 3:
+        raise ValueError("currency must be a three-letter code")
+    merchant = _required_text(anomaly, "merchant_name")
+    country = _required_text(anomaly, "country").upper()
+    sender_bank = str(card.get("bic") or card.get("scheme") or "CARD").strip()
+    internal_id = uuid.UUID(transaction_id).int & 0x7FFFFFFF
+
+    transaction = {
+        "txn_id": internal_id,
+        "ts": timestamp.replace(tzinfo=None),
+        "ts_us": int(timestamp.timestamp() * 1_000_000),
+        "sender_bank": sender_bank,
+        "sender_account": pan,
+        "receiver_bank": f"POS-{country}",
+        "receiver_account": merchant,
+        "amount_paid": float(amount),
+        "payment_currency": currency,
+        "amount_received": float(amount),
+        "receiving_currency": currency,
+        "payment_format": "Credit Card",
+    }
+    return transaction_id, transaction
+
+
+@app.route("/api/nfc/transactions", methods=["POST"])
+def api_nfc_transactions():
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"detail": "JSON object required"}), 400
+
+    try:
+        transaction_id, transaction = _nfc_transaction(body)
+    except ValueError as error:
+        return jsonify({"detail": str(error)}), 422
+
+    fingerprint = json.dumps(body, sort_keys=True, separators=(",", ":"))
+    with _NFC_LOCK:
+        existing = _NFC_SUBMISSIONS.get(transaction_id)
+        if existing is not None:
+            if existing["fingerprint"] != fingerprint:
+                return jsonify({
+                    "detail": "Transaction ID already exists with a different payload"
+                }), 409
+            return jsonify({
+                "transaction_id": transaction_id,
+                "status": existing["status"],
+                "duplicate": True,
+            }), 200
+
+        if _THRESHOLDS is None:
+            return jsonify({"detail": "Fraud detector is not ready"}), 503
+
+        candidate = detect(_NFC_STORE, transaction, _THRESHOLDS)
+        status = "approved"
+        if candidate is not None:
+            alert = to_alert_json(candidate, datetime.now(timezone.utc))
+            alert["alert_id"] = f"AL-NFC-{transaction_id}"
+            alert["txn"]["txn_id"] = transaction_id
+            _ALERTS.append(alert)
+            _ALERTS.sort(key=lambda item: item["txn"]["timestamp"])
+            status = "flagged"
+
+        _NFC_SUBMISSIONS[transaction_id] = {
+            "fingerprint": fingerprint,
+            "payload": body,
+            "status": status,
+        }
+
+    return jsonify({
+        "transaction_id": transaction_id,
+        "status": status,
+        "duplicate": False,
+    }), 201
 
 
 @app.route("/api/investigate")
@@ -493,4 +621,4 @@ def api_rules():
 
 if __name__ == "__main__":
     load()
-    app.run(host="127.0.0.1", port=8000, threaded=True)  # threaded: concurrent streams
+    app.run(host="0.0.0.0", port=8000, threaded=True)  # threaded: concurrent streams

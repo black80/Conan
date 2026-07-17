@@ -14,13 +14,13 @@ type AlertsContextValue = {
   alerts: QueueEntry[]
   status: ConnectionStatus
   /** Post-hoc ground truth revealed by a fresh investigate call, session-only (BACKEND.md §4.1) — never persisted. */
-  truthByAlertId: Record<string, boolean>
+  truthByAlertId: Record<string, boolean | null>
   /** Live investigate streams keyed by alert_id — the single source of truth so the queue row and the case drawer never start two concurrent (and separately billed) investigations for the same alert. */
   investigations: Record<string, InvestigationState>
   refresh: () => Promise<void>
   applyCase: (alertId: string, updatedCase: Case) => void
   applyLabel: (alertId: string, label: QueueLabel) => void
-  applyTruth: (alertId: string, real: boolean) => void
+  applyTruth: (alertId: string, real: boolean | null) => void
   /** Starts investigating an alert unless it's already running/started. */
   ensureInvestigating: (alertId: string) => void
   /** Forces a fresh investigate stream even if one already ran (used after failures). */
@@ -32,14 +32,13 @@ const AlertsContext = React.createContext<AlertsContextValue | undefined>(undefi
 const RETRY_DELAY_MS = 3000
 
 /**
- * The backend refuses connections for ~30-60s while it loads the transaction graph
- * (BACKEND.md §1) — poll GET /api/alerts until the first successful response instead of
- * surfacing a hard error.
+ * The backend refuses connections while loading the graph, and live NFC alerts can arrive
+ * afterward, so keep polling GET /api/alerts instead of treating the queue as a snapshot.
  */
 export function AlertsProvider({ children }: { children: React.ReactNode }) {
   const [alerts, setAlerts] = React.useState<QueueEntry[]>([])
   const [status, setStatus] = React.useState<ConnectionStatus>("connecting")
-  const [truthByAlertId, setTruthByAlertId] = React.useState<Record<string, boolean>>({})
+  const [truthByAlertId, setTruthByAlertId] = React.useState<Record<string, boolean | null>>({})
   const [investigations, setInvestigations] = React.useState<Record<string, InvestigationState>>(
     {}
   )
@@ -62,9 +61,9 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
           setAlerts(data)
           setStatus("ready")
         })
-        .catch(() => {
-          if (cancelled) return
-          timer = setTimeout(attempt, RETRY_DELAY_MS)
+        .catch(() => undefined)
+        .finally(() => {
+          if (!cancelled) timer = setTimeout(attempt, RETRY_DELAY_MS)
         })
     }
 
@@ -88,7 +87,7 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
     )
   }, [])
 
-  const applyTruth = React.useCallback((alertId: string, real: boolean) => {
+  const applyTruth = React.useCallback((alertId: string, real: boolean | null) => {
     setTruthByAlertId((prev) => ({ ...prev, [alertId]: real }))
   }, [])
 

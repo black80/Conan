@@ -231,7 +231,7 @@ export type InvestigateEvent =
   | ToolDoneEvent
   | FilingEvent
   | StreamErrorEvent
-  | { type: "done"; case: Case; truth: { real: boolean } }
+  | { type: "done"; case: Case; truth: { real: boolean | null } }
 
 export type AskEvent =
   | ToolEvent

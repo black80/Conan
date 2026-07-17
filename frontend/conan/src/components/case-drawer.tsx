@@ -110,7 +110,7 @@ function CaseDrawerBody({ entry }: { entry: QueueEntry }) {
       <SheetHeader className="border-b">
         <div className="flex items-center justify-between gap-2">
           <SheetTitle>{currentCase.case_id}</SheetTitle>
-          {truth !== undefined && (
+          {typeof truth === "boolean" && (
             <Badge variant={truth ? "destructive" : "secondary"}>
               {truth ? "Ground truth: fraud" : "Ground truth: legitimate"}
             </Badge>

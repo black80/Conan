@@ -5,6 +5,10 @@ import type { FilingEvent, ToolDoneEvent, ToolEvent } from "@/api/types"
 
 type ActivityEvent = ToolEvent | ToolDoneEvent | FilingEvent
 
+function isActivityEvent(event: { type: string }): event is ActivityEvent {
+  return event.type === "tool" || event.type === "tool_done" || event.type === "filing"
+}
+
 type Step = {
   key: string
   label: string
@@ -37,8 +41,8 @@ function buildSteps(events: ActivityEvent[]): Step[] {
   return steps
 }
 
-export function AgentActivityTimeline({ events }: { events: ActivityEvent[] }) {
-  const steps = buildSteps(events)
+export function AgentActivityTimeline({ events }: { events: { type: string }[] }) {
+  const steps = buildSteps(events.filter(isActivityEvent))
 
   if (steps.length === 0) {
     return <p className="text-sm text-muted-foreground">No activity yet.</p>

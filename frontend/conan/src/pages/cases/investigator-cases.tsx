@@ -48,7 +48,7 @@ export function InvestigatorCasesPage() {
           <CardTitle>My queue</CardTitle>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Logged in as</span>
-            <Select value={analyst} onValueChange={setAnalyst}>
+            <Select value={analyst} onValueChange={(value) => value && setAnalyst(value)}>
               <SelectTrigger size="sm">
                 <SelectValue />
               </SelectTrigger>

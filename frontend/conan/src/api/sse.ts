@@ -51,7 +51,7 @@ export async function sseFetch<TEvent extends { type: string }>(
 
   if (!res.ok || !res.body) {
     const message = (await res.json().catch(() => null)) as { error?: string } | null
-    onEvent({ type: "error", message: message?.error ?? res.statusText } as TEvent)
+    onEvent({ type: "error", message: message?.error ?? res.statusText } as unknown as TEvent)
     return
   }
 
