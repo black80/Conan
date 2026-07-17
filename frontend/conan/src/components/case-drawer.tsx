@@ -142,13 +142,11 @@ function CaseDrawerBody({ entry }: { entry: QueueEntry }) {
           {reinvestigateStream.events.length > 0 ? (
             <AgentActivityTimeline events={reinvestigateStream.events} />
           ) : (
-            <ul className="space-y-1.5 text-sm text-muted-foreground">
-              {currentCase.reasoning_trace.map((line, i) => (
-                <li key={i} className="font-mono">
-                  {line}
-                </li>
-              ))}
-            </ul>
+            <pre className="overflow-x-auto rounded-lg border bg-muted p-3 text-xs leading-relaxed">
+              <code className="font-mono text-muted-foreground">
+                {currentCase.reasoning_trace.join("\n")}
+              </code>
+            </pre>
           )}
         </TabsContent>
         <TabsContent value="ask" className="flex flex-1 flex-col overflow-hidden pt-4">
@@ -258,6 +256,20 @@ function SummaryTab({ case: currentCase }: { case: Case }) {
   )
 }
 
+function ChatLoadingIndicator() {
+  return (
+    <div className="flex items-center gap-1 py-0.5" aria-label="Waiting for response">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60"
+          style={{ animationDelay: `${i * 0.15}s` }}
+        />
+      ))}
+    </div>
+  )
+}
+
 function AskTab({ caseId }: { caseId: string }) {
   const [history, setHistory] = React.useState<ChatTurn[]>([])
   const [question, setQuestion] = React.useState("")
@@ -300,11 +312,16 @@ function AskTab({ caseId }: { caseId: string }) {
         ))}
         {status === "streaming" && (
           <div className="max-w-[85%] space-y-2 rounded-lg bg-muted px-3 py-2 text-sm">
-            <AgentActivityTimeline
-              events={events.filter(
-                (e): e is ToolEvent | ToolDoneEvent => e.type === "tool" || e.type === "tool_done"
-              )}
-            />
+            {events.some((e) => e.type === "tool" || e.type === "tool_done") ? (
+              <AgentActivityTimeline
+                events={events.filter(
+                  (e): e is ToolEvent | ToolDoneEvent =>
+                    e.type === "tool" || e.type === "tool_done"
+                )}
+              />
+            ) : (
+              <ChatLoadingIndicator />
+            )}
           </div>
         )}
         {status === "error" && (
