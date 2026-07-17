@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { usePagination } from "@/hooks/use-pagination"
+import { titleCase } from "@/lib/utils"
 import { useAlerts } from "@/state/alerts-context"
 
 function lastToolLabel(events: InvestigateEvent[]): string | null {
@@ -123,8 +124,8 @@ export function AlertsQueueTable({
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {entry.rules_fired.slice(0, 2).map((rule) => (
-                    <Badge key={rule} variant="secondary" className="font-mono">
-                      {rule}
+                    <Badge key={rule} variant="secondary">
+                      {titleCase(rule)}
                     </Badge>
                   ))}
                   {entry.rules_fired.length > 2 && (

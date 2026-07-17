@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table"
 import { useAgentStream } from "@/hooks/use-agent-stream"
 import { usePagination } from "@/hooks/use-pagination"
+import { titleCase } from "@/lib/utils"
 
 type ReflectCard = {
   case_id: string
@@ -92,7 +93,8 @@ function DiffLine({ diff }: { diff: RerunDiff }) {
       {diff.typology[0] !== diff.typology[1] && (
         <>
           {" · "}
-          {diff.typology[0] ?? "—"} → {diff.typology[1] ?? "—"}
+          {diff.typology[0] ? titleCase(diff.typology[0]) : "—"} →{" "}
+          {diff.typology[1] ? titleCase(diff.typology[1]) : "—"}
         </>
       )}
     </p>

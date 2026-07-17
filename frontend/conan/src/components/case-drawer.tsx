@@ -14,7 +14,7 @@ import type {
   ToolDoneEvent,
   ToolEvent,
 } from "@/api/types"
-import { AgentActivityTimeline } from "@/components/agent-activity-timeline"
+import { AgentActivityTimeline, ReasoningTraceTimeline } from "@/components/agent-activity-timeline"
 import { DisagreementBadge } from "@/components/disagreement-badge"
 import { EvidenceLedger } from "@/components/evidence-ledger"
 import { MarkdownText } from "@/components/markdown-text"
@@ -142,11 +142,7 @@ function CaseDrawerBody({ entry }: { entry: QueueEntry }) {
           {reinvestigateStream.events.length > 0 ? (
             <AgentActivityTimeline events={reinvestigateStream.events} />
           ) : (
-            <pre className="overflow-x-auto rounded-lg border bg-muted p-3 text-xs leading-relaxed">
-              <code className="font-mono text-muted-foreground">
-                {currentCase.reasoning_trace.join("\n")}
-              </code>
-            </pre>
+            <ReasoningTraceTimeline trace={currentCase.reasoning_trace} />
           )}
         </TabsContent>
         <TabsContent value="ask" className="flex flex-1 flex-col overflow-hidden pt-4">
