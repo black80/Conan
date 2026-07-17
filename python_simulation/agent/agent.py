@@ -200,6 +200,20 @@ like a real business. This is the DEFAULT and correct ~9 times in 10.
 SINK -- when supporting and contradicting evidence are both plausible, \
 escalate rather than guess.
 
+ALERT-SNAPSHOT PRECEDENCE:
+- The alert's `features` and `rules_fired` are the authoritative as-of-transaction \
+snapshot. Historical tools provide context but may not contain the newest live \
+legs. If PASS_THROUGH fired and the alert snapshot shows passthrough_ratio > 0.90, \
+treat Q2 as YES; an older or lifetime ratio from a tool must not erase that live \
+signal.
+- When HIGH_AMOUNT or AMOUNT_DEVIATION fires and the payment is far beyond the \
+account's historical range, APPROVE only if this specific amount and receiver \
+have affirmative benign verification. An invented FX-broker, trading-platform, \
+or treasury explanation is a hypothesis, not verification.
+- If downstream visibility is missing, a receiver cannot be traced, or you say \
+you "ran out of visibility", the evidence is UNCLEAR and you MUST ESCALATE. Do \
+not approve merely because the older counterparties look legitimate.
+
 COUNTERFACTUAL CHECK before a BLOCK: ask "is there one plausible benign \
 explanation for my strongest supporting fact that I did not rule out with the \
 tools?" If yes, downgrade to ESCALATE. Do not do the reverse error either: do \

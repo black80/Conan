@@ -310,7 +310,7 @@ private fun CaseClosedScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isInjecting,
                 label = { Text("Transaction amount") },
-                suffix = { Text("SAR") },
+                suffix = { Text("USD") },
                 singleLine = true,
                 isError = amountValidationAttempted && parseTransactionAmount(amountText) == null,
                 supportingText = if (amountValidationAttempted && parseTransactionAmount(amountText) == null) {
@@ -364,7 +364,7 @@ private fun CaseClosedScreen(
                                 val amount = parseTransactionAmount(amountText)
                                 if (amount == null) {
                                     snackbarHostState.showSnackbar(
-                                        "Enter a valid transaction amount in SAR",
+                                        "Enter a valid transaction amount in USD",
                                     )
                                     return@launch
                                 }

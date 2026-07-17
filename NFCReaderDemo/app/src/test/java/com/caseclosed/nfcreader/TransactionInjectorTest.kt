@@ -75,7 +75,7 @@ class TransactionInjectorTest {
         )
 
         assertEquals(transactionId.toString(), payload.getString("transaction_id"))
-        assertEquals("2026-07-13T10:26:47Z", payload.getString("timestamp"))
+        assertEquals("2022-09-11T10:26:47Z", payload.getString("timestamp"))
 
         val cardData = payload.getJSONObject("real_card_data")
         assertEquals(card.pan, cardData.getString("pan"))
@@ -104,7 +104,7 @@ class TransactionInjectorTest {
 
         val anomaly = payload.getJSONObject("anomaly_context")
         assertEquals("8250.50", anomaly.get("amount").toString())
-        assertEquals("SAR", anomaly.getString("currency"))
+        assertEquals("USD", anomaly.getString("currency"))
         assertEquals("HighEnd Electronics Online", anomaly.getString("merchant_name"))
         assertEquals("electronics", anomaly.getString("merchant_category"))
         assertEquals("SA", anomaly.getString("country"))
@@ -125,7 +125,6 @@ class TransactionInjectorTest {
         )
         val endpoint = server.url("/api/nfc/transactions").toString()
 
-        val beforeRequest = System.currentTimeMillis()
         val result = TransactionInjector.injectTransaction(
             card,
             endpoint,
@@ -145,13 +144,15 @@ class TransactionInjectorTest {
         val body = JSONObject(request.body.readUtf8())
         assertEquals(card.pan, body.getJSONObject("real_card_data").getString("pan"))
         UUID.fromString(body.getString("transaction_id"))
+        val emittedTimestamp = body.getString("timestamp")
         val emittedTime = SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss'Z'",
             Locale.US,
         ).apply {
             timeZone = TimeZone.getTimeZone("UTC")
-        }.parse(body.getString("timestamp"))!!.time
-        assertTrue(emittedTime in (beforeRequest - 1_000)..System.currentTimeMillis())
+        }.parse(emittedTimestamp)
+        assertEquals("2022-09-11", emittedTimestamp.substringBefore('T'))
+        assertTrue(emittedTime != null)
         assertEquals(
             0,
             amount.compareTo(

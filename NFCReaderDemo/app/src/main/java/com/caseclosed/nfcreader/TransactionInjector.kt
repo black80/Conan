@@ -92,7 +92,7 @@ object TransactionInjector {
         transactionTime: Date = Date(),
     ): JSONObject = JSONObject().apply {
         put("transaction_id", transactionId.toString())
-        put("timestamp", transactionTime.toUtcTimestamp())
+        put("timestamp", transactionTime.toDemoTimestamp())
         put(
             "real_card_data",
             JSONObject().apply {
@@ -141,7 +141,7 @@ object TransactionInjector {
             "anomaly_context",
             JSONObject().apply {
                 put("amount", amount)
-                put("currency", "SAR")
+                put("currency", "USD")
                 put("merchant_name", "HighEnd Electronics Online")
                 put("merchant_category", "electronics")
                 put("country", "SA")
@@ -154,8 +154,8 @@ object TransactionInjector {
         )
     }
 
-    private fun Date.toUtcTimestamp(): String = SimpleDateFormat(
-        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+    private fun Date.toDemoTimestamp(): String = SimpleDateFormat(
+        "'2022-09-11T'HH:mm:ss'Z'",
         Locale.US,
     ).apply {
         timeZone = TimeZone.getTimeZone("UTC")

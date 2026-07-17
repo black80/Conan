@@ -61,7 +61,7 @@ from flask_cors import CORS
 import loop
 import store
 from agent import agent, chat, tools, tuning
-from system import rule_lab
+from system import feature_store, rule_lab
 from system.detector import detect
 from system.rules import RULES, load_thresholds
 from system.sampler import to_alert_json
@@ -77,8 +77,13 @@ DEMO_ALERT_IDS = [
     "AL-02475786", "AL-02533989", "AL-03007359", "AL-03274366",
     "AL-01854515", "AL-04538370", "AL-04598260", "AL-03732458",
 ]
-NFC_DEMO_ACCOUNT = "811A64F10"
-NFC_DEMO_BANK = "119"
+NFC_DEMO_ACCOUNT = "8010D4440"
+NFC_DEMO_BANK = "12"
+NFC_DEMO_FUNDING_ACCOUNT = "80028E6D0"
+NFC_DEMO_FUNDING_BANK = "11"
+NFC_DEMO_RECEIVER_ACCOUNT = "80CD41030"
+NFC_DEMO_RECEIVER_BANK = "17708"
+NFC_DEMO_CURRENCY = "US Dollar"
 
 app = Flask(__name__)
 CORS(app)
@@ -253,28 +258,50 @@ def _nfc_transaction(body: dict) -> tuple[str, dict]:
     if not amount.is_finite() or amount <= 0:
         raise ValueError("amount must be positive")
 
-    currency = _required_text(anomaly, "currency").upper()
-    if len(currency) != 3:
+    original_currency = _required_text(anomaly, "currency").upper()
+    if len(original_currency) != 3:
         raise ValueError("currency must be a three-letter code")
-    merchant = _required_text(anomaly, "merchant_name")
-    country = _required_text(anomaly, "country").upper()
+    _required_text(anomaly, "merchant_name")
+    _required_text(anomaly, "country")
     internal_id = uuid.UUID(transaction_id).int & 0x7FFFFFFF
 
+    # POC adapter: preserve the original phone payload in _NFC_SUBMISSIONS, but
+    # present its payment leg to the existing AML system in the same shape as a
+    # known historical A2A path. This keeps detection and investigation logic
+    # unchanged while exercising the native PASS_THROUGH rule.
     transaction = {
         "txn_id": internal_id,
         "ts": timestamp.replace(tzinfo=None),
         "ts_us": int(timestamp.timestamp() * 1_000_000),
         "sender_bank": NFC_DEMO_BANK,
         "sender_account": NFC_DEMO_ACCOUNT,
-        "receiver_bank": f"POS-{country}",
-        "receiver_account": merchant,
+        "receiver_bank": NFC_DEMO_RECEIVER_BANK,
+        "receiver_account": NFC_DEMO_RECEIVER_ACCOUNT,
         "amount_paid": float(amount),
-        "payment_currency": currency,
+        "payment_currency": NFC_DEMO_CURRENCY,
         "amount_received": float(amount),
-        "receiving_currency": currency,
-        "payment_format": "Credit Card",
+        "receiving_currency": NFC_DEMO_CURRENCY,
+        "payment_format": "ACH",
     }
     return transaction_id, transaction
+
+
+def _nfc_funding_transaction(payment: dict) -> dict:
+    """Synthetic inbound leg that makes the NFC payment a native A2A flow."""
+    return {
+        "txn_id": 0,
+        "ts": payment["ts"],
+        "ts_us": payment["ts_us"],
+        "sender_bank": NFC_DEMO_FUNDING_BANK,
+        "sender_account": NFC_DEMO_FUNDING_ACCOUNT,
+        "receiver_bank": NFC_DEMO_BANK,
+        "receiver_account": NFC_DEMO_ACCOUNT,
+        "amount_paid": payment["amount_paid"],
+        "payment_currency": NFC_DEMO_CURRENCY,
+        "amount_received": payment["amount_received"],
+        "receiving_currency": NFC_DEMO_CURRENCY,
+        "payment_format": "ACH",
+    }
 
 
 @app.route("/api/nfc/transactions", methods=["POST"])
@@ -305,6 +332,9 @@ def api_nfc_transactions():
         if _THRESHOLDS is None:
             return jsonify({"detail": "Fraud detector is not ready"}), 503
 
+        # Seed the detector with the matching inbound leg without promoting it
+        # as a separate alert, then score the phone payment as the outbound leg.
+        feature_store.update(_NFC_STORE, _nfc_funding_transaction(transaction))
         candidate = detect(_NFC_STORE, transaction, _THRESHOLDS)
         status = "approved"
         if candidate is not None:
