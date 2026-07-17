@@ -77,6 +77,8 @@ DEMO_ALERT_IDS = [
     "AL-02475786", "AL-02533989", "AL-03007359", "AL-03274366",
     "AL-01854515", "AL-04538370", "AL-04598260", "AL-03732458",
 ]
+NFC_DEMO_ACCOUNT = "811A64F10"
+NFC_DEMO_BANK = "119"
 
 app = Flask(__name__)
 CORS(app)
@@ -121,7 +123,7 @@ def sse_response(worker) -> Response:
 
 def is_real(alert: dict) -> bool | None:
     """Post-hoc truth for the badge -- never shown to the agent."""
-    if alert["alert_id"].startswith("AL-NFC-"):
+    if alert.get("source") == "nfc":
         return None
     day = date.fromisoformat(alert["txn"]["timestamp"][:10])
     return (alert["subject_account"], day) in _LAUND
@@ -130,6 +132,15 @@ def is_real(alert: dict) -> bool | None:
 def alert_by_id(alert_id: str) -> dict | None:
     with _NFC_LOCK:
         return next((a for a in _ALERTS if a["alert_id"] == alert_id), None)
+
+
+def new_alert_id() -> str:
+    """Return an unused ID with the same display shape as batch alerts."""
+    existing = {alert["alert_id"] for alert in _ALERTS}
+    while True:
+        alert_id = f"AL-{uuid.uuid4().int % 100_000_000:08d}"
+        if alert_id not in existing:
+            return alert_id
 
 
 def case_by_id(case_id: str) -> dict | None:
@@ -186,7 +197,11 @@ def api_alerts():
     case_by_alert = {c["alert"]["alert_id"]: c
                      for c in store.latest_by(store.CASES, "case_id").values()}
     out = []
-    for a in alerts:
+    for a in sorted(
+        alerts,
+        key=lambda alert: alert["txn"]["timestamp"],
+        reverse=True,
+    ):
         aid = a["alert_id"]
         case = case_by_alert.get(aid)
         lab = label_by_alert.get(aid)
@@ -243,15 +258,14 @@ def _nfc_transaction(body: dict) -> tuple[str, dict]:
         raise ValueError("currency must be a three-letter code")
     merchant = _required_text(anomaly, "merchant_name")
     country = _required_text(anomaly, "country").upper()
-    sender_bank = str(card.get("bic") or card.get("scheme") or "CARD").strip()
     internal_id = uuid.UUID(transaction_id).int & 0x7FFFFFFF
 
     transaction = {
         "txn_id": internal_id,
         "ts": timestamp.replace(tzinfo=None),
         "ts_us": int(timestamp.timestamp() * 1_000_000),
-        "sender_bank": sender_bank,
-        "sender_account": pan,
+        "sender_bank": NFC_DEMO_BANK,
+        "sender_account": NFC_DEMO_ACCOUNT,
         "receiver_bank": f"POS-{country}",
         "receiver_account": merchant,
         "amount_paid": float(amount),
@@ -295,7 +309,8 @@ def api_nfc_transactions():
         status = "approved"
         if candidate is not None:
             alert = to_alert_json(candidate, datetime.now(timezone.utc))
-            alert["alert_id"] = f"AL-NFC-{transaction_id}"
+            alert["alert_id"] = new_alert_id()
+            alert["source"] = "nfc"
             alert["txn"]["txn_id"] = transaction_id
             _ALERTS.append(alert)
             _ALERTS.sort(key=lambda item: item["txn"]["timestamp"])

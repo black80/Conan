@@ -86,7 +86,14 @@ export function AlertsQueueTable({
   onSelect: (alertId: string) => void
   emptyLabel?: string
 }) {
-  const { page, setPage, pageCount, pageItems } = usePagination(entries)
+  const newestFirstEntries = React.useMemo(
+    () =>
+      [...entries].sort(
+        (left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp),
+      ),
+    [entries],
+  )
+  const { page, setPage, pageCount, pageItems } = usePagination(newestFirstEntries)
 
   return (
     <div className="space-y-2">

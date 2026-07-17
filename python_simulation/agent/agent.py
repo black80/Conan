@@ -705,7 +705,11 @@ def investigate(alert: dict, model: str = MODEL, client=None,
              leave-one-out (this alert's own card is never shown). EXPLICIT
              opt-in only -- batch benchmarks that don't pass it are unaffected.
     """
-    as_of = alert["txn"]["timestamp"]
+    as_of = (
+        None
+        if alert.get("source") == "nfc"
+        else alert["txn"]["timestamp"]
+    )
     trace: list[str] = []
     system = SYSTEM_V3 if version == "v3" else SYSTEM_V4
     if exemplars:
