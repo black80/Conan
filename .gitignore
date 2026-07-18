@@ -2,6 +2,8 @@
 build/
 bin/
 lib/
+!frontend/conan/src/lib/
+!frontend/conan/src/lib/**
 lib64/
 pkg/
 conanbuildinfo.*
