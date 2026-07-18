@@ -16,6 +16,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# committed on purpose: turns on the mocked zero-backend demo build (no secrets)
+!.env.production
 
 # Editor directories and files
 .vscode/*

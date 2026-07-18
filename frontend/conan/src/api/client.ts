@@ -1,3 +1,6 @@
+import { mockFetch } from "@/api/mocks/fetch"
+import { USE_MOCKS } from "@/api/mocks/flag"
+
 export const API_BASE_URL: string =
   (import.meta.env.VITE_API_URL as string | undefined) ?? "http://127.0.0.1:8000"
 
@@ -21,6 +24,8 @@ async function parseErrorMessage(res: Response): Promise<string> {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  if (USE_MOCKS) return mockFetch<T>(path, init)
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {

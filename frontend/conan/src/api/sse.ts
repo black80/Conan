@@ -1,4 +1,6 @@
 import { apiUrl } from "@/api/client"
+import { USE_MOCKS } from "@/api/mocks/flag"
+import { mockEventSource, mockSseFetch } from "@/api/mocks/stream"
 
 /**
  * GET /api/investigate is EventSource-compatible (BACKEND.md §2). The POST streaming
@@ -10,6 +12,8 @@ export function streamEventSource<TEvent extends { type: string }>(
   params: Record<string, string>,
   onEvent: (event: TEvent) => void
 ): () => void {
+  if (USE_MOCKS) return mockEventSource<TEvent>(path, params, onEvent)
+
   const url = new URL(apiUrl(path))
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value)
@@ -42,6 +46,8 @@ export async function sseFetch<TEvent extends { type: string }>(
   onEvent: (event: TEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
+  if (USE_MOCKS) return mockSseFetch<TEvent>(path, body, onEvent, signal)
+
   const res = await fetch(apiUrl(path), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
